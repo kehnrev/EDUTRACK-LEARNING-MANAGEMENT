@@ -1,0 +1,36 @@
+@model IEnumerable<Enrollment>
+@{
+    ViewData["Title"] = "Enrollments";
+}
+
+<div class="dashboard-heading">
+    <div>
+        <span class="eyebrow">Enrollment management</span>
+        <h1>Enrollments</h1>
+    </div>
+    <a class="btn btn-primary" asp-action="Create" asp-route-courseId="@ViewBag.CourseId">Enroll Student</a>
+</div>
+
+<form class="toolbar-form" method="get">
+    <input type="hidden" name="courseId" value="@ViewBag.CourseId" />
+    <input class="form-control" name="search" value="@ViewBag.Search" placeholder="Search course or student" />
+    <button class="btn btn-outline-primary" type="submit">Search</button>
+</form>
+
+<div class="table-responsive panel">
+    <table class="table align-middle">
+        <thead><tr><th>Course</th><th>Student</th><th>Completion</th><th>Date</th><th></th></tr></thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Course?.Title</td>
+                    <td>@item.Student?.FullName</td>
+                    <td>@item.CompletionPercentage%</td>
+                    <td>@item.EnrollmentDate.ToLocalTime().ToString("MMM dd, yyyy")</td>
+                    <td class="text-end"><a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@item.EnrollmentId">Remove</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

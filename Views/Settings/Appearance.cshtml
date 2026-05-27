@@ -1,0 +1,105 @@
+@model AppearanceSettingsViewModel
+@{
+    ViewData["Title"] = "Appearance Settings";
+}
+
+<div class="dashboard-heading">
+    <div>
+        <span class="eyebrow">User settings</span>
+        <h1>Appearance Settings</h1>
+        <p>Customize your learning workspace for better readability and comfort.</p>
+    </div>
+</div>
+
+<form asp-action="Appearance" method="post" class="form-shell settings-form" data-appearance-form>
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <section class="settings-section">
+        <h2>Theme Mode</h2>
+        <div class="option-grid">
+            @foreach (var item in UserSettings.ThemeModes)
+            {
+                <label class="option-card">
+                    <input asp-for="ThemeMode" type="radio" value="@item" />
+                    <strong>@(item == "System" ? "System Default" : $"{item} Mode")</strong>
+                    <span>@(item == "Dark" ? "Use a darker workspace for low-light viewing." : item == "System" ? "Follow your device theme when possible." : "Use the bright default EduTrack theme.")</span>
+                </label>
+            }
+        </div>
+        <span asp-validation-for="ThemeMode" class="text-danger"></span>
+    </section>
+
+    <section class="settings-section">
+        <h2>Layout Style</h2>
+        <div class="option-grid two">
+            @foreach (var item in UserSettings.LayoutStyles)
+            {
+                <label class="option-card">
+                    <input asp-for="LayoutStyle" type="radio" value="@item" />
+                    <strong>@item Layout</strong>
+                    <span>@(item == "Compact" ? "Reduce spacing for dense dashboard work." : "Keep generous spacing for comfortable reading.")</span>
+                </label>
+            }
+        </div>
+        <span asp-validation-for="LayoutStyle" class="text-danger"></span>
+    </section>
+
+    <section class="settings-section">
+        <h2>Sidebar Preference</h2>
+        <div class="option-grid two">
+            @foreach (var item in UserSettings.SidebarStates)
+            {
+                <label class="option-card">
+                    <input asp-for="SidebarState" type="radio" value="@item" />
+                    <strong>@item Sidebar</strong>
+                    <span>@(item == "Collapsed" ? "Keep navigation narrow while working." : "Show the full sidebar navigation labels.")</span>
+                </label>
+            }
+        </div>
+        <span asp-validation-for="SidebarState" class="text-danger"></span>
+    </section>
+
+    <section class="settings-section">
+        <h2>Font Size</h2>
+        <div class="option-grid">
+            @foreach (var item in UserSettings.FontSizes)
+            {
+                <label class="option-card">
+                    <input asp-for="FontSize" type="radio" value="@item" />
+                    <strong>@item</strong>
+                    <span>@(item == "Large" ? "Increase readability for longer study sessions." : item == "Small" ? "Show more information on screen." : "Use the balanced default size.")</span>
+                </label>
+            }
+        </div>
+        <span asp-validation-for="FontSize" class="text-danger"></span>
+    </section>
+
+    <section class="settings-section">
+        <h2>Dashboard Card Style</h2>
+        <div class="option-grid two">
+            @foreach (var item in UserSettings.CardStyles)
+            {
+                <label class="option-card">
+                    <input asp-for="CardStyle" type="radio" value="@item" />
+                    <strong>@(item == "Default" ? "Default cards" : "Minimal cards")</strong>
+                    <span>@(item == "Minimal" ? "Use flatter cards with less shadow." : "Use the standard card style.")</span>
+                </label>
+            }
+        </div>
+        <span asp-validation-for="CardStyle" class="text-danger"></span>
+    </section>
+
+    <div class="button-row">
+        <button class="btn btn-primary" type="submit">Save Settings</button>
+        <a class="btn btn-outline-primary" asp-controller="@(User.IsInRole("Admin") ? "Admin" : User.IsInRole("Teacher") ? "Teacher" : "Student")" asp-action="Index">Back to Dashboard</a>
+    </div>
+
+    @if (Model.UpdatedAt.HasValue)
+    {
+        <p class="settings-meta">Last updated @Model.UpdatedAt.Value.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</p>
+    }
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

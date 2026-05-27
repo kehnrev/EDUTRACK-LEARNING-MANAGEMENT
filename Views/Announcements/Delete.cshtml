@@ -1,0 +1,14 @@
+@model Announcement
+@{
+    ViewData["Title"] = "Delete Announcement";
+}
+
+<section class="panel delete-panel">
+    <h1>Delete announcement?</h1>
+    <p>This will remove <strong>@Model.Title</strong>.</p>
+    <form asp-action="Delete" method="post">
+        <input type="hidden" name="id" value="@Model.AnnouncementId" />
+        <a class="btn btn-outline-primary" asp-action="Index">Cancel</a>
+        <button class="btn btn-danger" type="submit">Confirm Delete</button>
+    </form>
+</section>

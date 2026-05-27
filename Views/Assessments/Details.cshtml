@@ -1,0 +1,81 @@
+@model Assessment
+@{
+    ViewData["Title"] = Model.Title;
+    var passCount = Model.Submissions.Count(s => s.Score >= 75);
+    var failCount = Model.Submissions.Count(s => s.Score < 75);
+}
+
+<div class="dashboard-heading">
+    <div>
+        <span class="eyebrow">@Model.Course?.Title</span>
+        <h1>@Model.Title</h1>
+        <p>@Model.Instructions</p>
+    </div>
+    <div class="button-row">
+        <a class="btn btn-outline-primary" asp-action="Index" asp-route-courseId="@Model.CourseId">Back</a>
+        @if (User.IsInRole("Student"))
+        {
+            <a class="btn btn-primary" asp-action="Take" asp-route-id="@Model.AssessmentId">Take Assessment</a>
+        }
+        @if (User.IsInRole("Admin") || User.IsInRole("Teacher"))
+        {
+            <a class="btn btn-primary" asp-controller="Questions" asp-action="Create" asp-route-assessmentId="@Model.AssessmentId">Add Question</a>
+        }
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card"><span>Total points</span><strong>@Model.TotalPoints</strong></div>
+    <div class="stat-card"><span>Questions</span><strong>@Model.Questions.Count</strong></div>
+    <div class="stat-card"><span>Submissions</span><strong>@Model.Submissions.Count</strong></div>
+    <div class="stat-card"><span>Due date</span><strong>@Model.DueDate.ToString("MMM dd")</strong></div>
+</div>
+
+<div class="dashboard-grid">
+    <section class="panel">
+        <h2>Pass and fail rate</h2>
+        <canvas class="analytics-chart" data-chart="pie" data-labels="Passed,Needs support" data-values="@passCount,@failCount" height="220"></canvas>
+    </section>
+    <section class="panel">
+        <h2>Questions</h2>
+        @if (!Model.Questions.Any())
+        {
+            <p class="empty-copy">No questions yet.</p>
+        }
+        else
+        {
+            <div class="list-stack">
+                @foreach (var question in Model.Questions)
+                {
+                    <div>
+                        <strong>@question.QuestionText</strong>
+                        <span>@question.Points points - correct answer @question.CorrectAnswer</span>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+</div>
+
+@if (User.IsInRole("Admin") || User.IsInRole("Teacher"))
+{
+    <section class="panel mt-4">
+        <h2>Student submissions</h2>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th>Student</th><th>Score</th><th>Submitted</th><th>Status</th></tr></thead>
+                <tbody>
+                    @foreach (var submission in Model.Submissions.OrderByDescending(s => s.SubmittedAt))
+                    {
+                        <tr>
+                            <td>@submission.Student?.FullName</td>
+                            <td>@submission.Score.ToString("0.##")%</td>
+                            <td>@submission.SubmittedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</td>
+                            <td>@submission.Status</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}

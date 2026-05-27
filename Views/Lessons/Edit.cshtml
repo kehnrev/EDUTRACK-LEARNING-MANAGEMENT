@@ -1,0 +1,25 @@
+@model Lesson
+@{
+    ViewData["Title"] = "Edit Lesson";
+}
+
+<div class="dashboard-heading">
+    <div>
+        <span class="eyebrow">Learning materials</span>
+        <h1>Edit lesson</h1>
+    </div>
+    <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@Model.LessonId">Back</a>
+</div>
+
+<section class="panel form-panel">
+    <form asp-action="Edit" method="post" novalidate>
+        <input asp-for="LessonId" type="hidden" />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <partial name="_LessonForm" model="Model" />
+        <button class="btn btn-primary mt-4" type="submit">Update Lesson</button>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

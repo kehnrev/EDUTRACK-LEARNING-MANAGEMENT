@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="EduTrack icon">
+  <rect width="512" height="512" rx="96" fill="#0f172a"/>
+  <path d="M112 166c0-25 20-45 45-45h198c25 0 45 20 45 45v180c0 25-20 45-45 45H157c-25 0-45-20-45-45V166z" fill="#ffffff"/>
+  <path d="M158 181h196v34H158v-34zm0 61h86v34h-86v-34zm112 0h84v34h-84v-34zm-112 61h54v34h-54v-34zm80 0h116v34H238v-34z" fill="#dbe4ee"/>
+  <path d="M164 337l50-60 48 38 78-100 28 22-101 130-48-39-30 36-25-27z" fill="#0f766e"/>
+  <circle cx="374" cy="152" r="46" fill="#f59e0b"/>
+  <text x="256" y="464" text-anchor="middle" font-family="Arial, sans-serif" font-size="54" font-weight="800" fill="#ffffff">ET</text>
+</svg>

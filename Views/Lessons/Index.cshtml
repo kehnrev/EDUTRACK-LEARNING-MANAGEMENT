@@ -1,0 +1,52 @@
+@model IEnumerable<Lesson>
+@{
+    ViewData["Title"] = "Lessons";
+}
+
+<div class="dashboard-heading">
+    <div>
+        <span class="eyebrow">Learning materials</span>
+        <h1>Lessons</h1>
+    </div>
+    @if (User.IsInRole("Admin") || User.IsInRole("Teacher"))
+    {
+        <a class="btn btn-primary" asp-action="Create" asp-route-courseId="@ViewBag.CourseId">Add Lesson</a>
+    }
+</div>
+
+<form class="toolbar-form" method="get">
+    <input type="hidden" name="courseId" value="@ViewBag.CourseId" />
+    <input class="form-control" name="search" value="@ViewBag.Search" placeholder="Search lessons" />
+    <button class="btn btn-outline-primary" type="submit">Search</button>
+</form>
+
+@if (!Model.Any())
+{
+    <div class="empty-state">No lessons available yet. Ask your teacher to post learning materials for your enrolled course.</div>
+}
+else
+{
+    <div class="table-responsive panel">
+        <table class="table align-middle">
+            <thead><tr><th>Title</th><th>Course</th><th>Offline</th><th>Date</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var lesson in Model)
+                {
+                    <tr>
+                        <td>@lesson.Title</td>
+                        <td>@lesson.Course?.Title</td>
+                        <td><span class="badge @(lesson.IsAvailableOffline ? "text-bg-success" : "text-bg-secondary")">@(lesson.IsAvailableOffline ? "Available Offline" : "Online Only")</span></td>
+                        <td>@lesson.DateCreated.ToLocalTime().ToString("MMM dd, yyyy")</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@lesson.LessonId">Open</a>
+                            @if (User.IsInRole("Admin") || User.IsInRole("Teacher"))
+                            {
+                                <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@lesson.LessonId">Edit</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

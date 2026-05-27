@@ -1,0 +1,20 @@
+@model IEnumerable<Submission>
+@{
+    var summary = ViewBag.Summary as ReportSummaryViewModel;
+    ViewData["Title"] = "Student Performance Report";
+}
+
+<partial name="_ReportHeader" model="summary" />
+
+<form class="toolbar-form no-print" method="get">
+    @if (!User.IsInRole("Student"))
+    {
+        <select class="form-select" name="studentId" asp-items="ViewBag.Students">
+            <option value="">All students</option>
+        </select>
+    }
+    <button class="btn btn-outline-primary" type="submit">Generate</button>
+    <button class="btn btn-primary" type="button" onclick="window.print()">Print</button>
+</form>
+
+<partial name="_SubmissionReportTable" model="Model" />

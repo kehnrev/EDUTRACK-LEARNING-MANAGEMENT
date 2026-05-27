@@ -1,0 +1,118 @@
+@model StudentDashboardViewModel
+@{
+    ViewData["Title"] = "Student Dashboard";
+    var performanceLabel = PerformanceLabelHelper.GetLabel(Model.AverageScore);
+    var progressLabels = string.Join(",", Model.CourseProgress.Keys.Select(ChartLabelHelper.GetShortCourseLabel));
+    var progressFullLabels = string.Join(",", Model.CourseProgress.Keys);
+    var progressValues = string.Join(",", Model.CourseProgress.Values);
+    var scoreLabels = string.Join(",", Model.RecentScores.Select(s => ChartLabelHelper.GetShortAssessmentLabel(s.Assessment?.Title ?? "Assessment")));
+    var scoreFullLabels = string.Join(",", Model.RecentScores.Select(s => s.Assessment?.Title ?? "Assessment"));
+    var scoreValues = string.Join(",", Model.RecentScores.Select(s => s.Score));
+}
+
+<div class="dashboard-heading">
+    <div>
+        <span class="eyebrow">Student dashboard</span>
+        <h1>Your learning progress</h1>
+    </div>
+    <a class="btn btn-primary" asp-controller="Assessments" asp-action="Index">Take Assessment</a>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card"><span>Enrolled courses</span><strong>@Model.EnrolledCourses</strong></div>
+    <div class="stat-card"><span>Upcoming assessments</span><strong>@Model.UpcomingAssessments</strong></div>
+    <div class="stat-card"><span>Average score</span><strong>@Model.AverageScore.ToString("0.##")%</strong></div>
+    <div class="stat-card"><span>Progress status</span><strong><span class="badge @PerformanceLabelHelper.GetBadgeClass(Model.AverageScore)">@performanceLabel</span></strong></div>
+    <div class="stat-card"><span>Progress</span><strong>@Model.ProgressPercentage.ToString("0.##")%</strong></div>
+    <div class="stat-card"><span>Offline lessons</span><strong>@Model.OfflineAvailableLessons</strong></div>
+    <div class="stat-card"><span>Pending sync</span><strong>@Model.PendingSyncSubmissions</strong></div>
+</div>
+
+<section class="notification-strip" aria-label="Learning notifications">
+    <div><strong>New assessment posted</strong><span>Check the upcoming application quizzes for your enrolled courses.</span></div>
+    <div><strong>New lesson available</strong><span>Offline-ready lessons are available in your learning library.</span></div>
+    <div><strong>Score released</strong><span>Your recent quiz scores are available below.</span></div>
+    <div><strong>Offline sync status</strong><span>@(Model.PendingSyncSubmissions > 0 ? "You have pending offline work to sync." : "All saved submissions are synced.")</span></div>
+</section>
+
+<div class="dashboard-grid">
+    <section class="panel">
+        <h2>Course Progress Overview</h2>
+        @if (!Model.CourseProgress.Any())
+        {
+            <p class="empty-copy">No progress data yet. Complete lessons and assessments to generate your progress chart.</p>
+        }
+        else
+        {
+            <canvas class="analytics-chart" data-chart="horizontalBar" data-title="Course Progress Overview" data-labels="@progressLabels" data-full-labels="@progressFullLabels" data-values="@progressValues" data-scale-max="100" data-tooltip-label="Progress" data-empty="No progress data yet. Complete lessons and assessments to generate your progress chart." height="320"></canvas>
+        }
+    </section>
+    <section class="panel">
+        <h2>Upcoming assessments</h2>
+        @if (!Model.Assessments.Any())
+        {
+            <p class="empty-copy">No upcoming assessments.</p>
+        }
+        else
+        {
+            <div class="list-stack">
+                @foreach (var item in Model.Assessments)
+                {
+                    <div>
+                        <strong>@item.Title</strong>
+                        <span>@item.Course?.Title - Due @item.DueDate.ToString("MMM dd, yyyy")</span>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+</div>
+
+<div class="dashboard-grid mt-4">
+    <section class="panel">
+        <h2>Recent Assessment Scores</h2>
+        @if (!Model.RecentScores.Any())
+        {
+            <p class="empty-copy">No assessment scores yet. Complete an assessment to see your score trend.</p>
+        }
+        else
+        {
+            <canvas class="analytics-chart" data-chart="bar" data-title="Assessment Score Summary" data-labels="@scoreLabels" data-full-labels="@scoreFullLabels" data-values="@scoreValues" data-scale-max="100" data-tooltip-label="Score" data-empty="No assessment scores yet. Complete an assessment to see your score trend." height="260"></canvas>
+        }
+    </section>
+    <section class="panel">
+        <h2>Completion Status</h2>
+        <canvas class="analytics-chart" data-chart="doughnut" data-title="Completion Status" data-labels="Completed,Remaining" data-values="@Model.CompletedAssessments,@Model.RemainingAssessments" data-empty="No completion data yet. Start an assessment to build your completion status." height="260"></canvas>
+    </section>
+</div>
+
+<section class="panel mt-4">
+    <h2>Recent scores</h2>
+    @if (!Model.RecentScores.Any())
+    {
+        <p class="empty-copy">No scores yet. Complete an assessment to view your performance and recommendations.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th>Assessment</th><th>Course</th><th>Score</th><th>Performance</th><th>Status</th></tr></thead>
+                <tbody>
+                    @foreach (var score in Model.RecentScores)
+                    {
+                        var badgeClass = score.Status == SubmissionStatus.Synced ? "text-bg-success" : "text-bg-warning";
+                        var label = PerformanceLabelHelper.GetLabel(score.Score);
+
+                        <tr>
+                            <td>@score.Assessment?.Title</td>
+                            <td>@score.Assessment?.Course?.Title</td>
+                            <td>@score.Score.ToString("0.##")%</td>
+                            <td><span class="badge @PerformanceLabelHelper.GetBadgeClass(score.Score)">@label</span></td>
+                            <td><span class="badge @badgeClass">@score.Status</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

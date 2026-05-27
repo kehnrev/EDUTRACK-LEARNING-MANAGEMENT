@@ -1,0 +1,14 @@
+@model ApplicationUser
+@{
+    ViewData["Title"] = "Delete User";
+}
+
+<section class="panel delete-panel">
+    <h1>Delete user?</h1>
+    <p>This will remove <strong>@Model.FullName</strong> if there are no related learning records.</p>
+    <form asp-action="DeleteUser" method="post">
+        <input type="hidden" name="id" value="@Model.Id" />
+        <a class="btn btn-outline-primary" asp-action="Users">Cancel</a>
+        <button class="btn btn-danger" type="submit">Confirm Delete</button>
+    </form>
+</section>

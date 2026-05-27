@@ -1,0 +1,47 @@
+@model IEnumerable<Announcement>
+@{
+    ViewData["Title"] = "Announcements";
+}
+
+<div class="dashboard-heading">
+    <div>
+        <span class="eyebrow">Updates</span>
+        <h1>Announcements</h1>
+    </div>
+    @if (User.IsInRole("Admin") || User.IsInRole("Teacher"))
+    {
+        <a class="btn btn-primary" asp-action="Create">Post Announcement</a>
+    }
+</div>
+
+<form class="toolbar-form" method="get">
+    <input class="form-control" name="search" value="@ViewBag.Search" placeholder="Search announcements" />
+    <button class="btn btn-outline-primary" type="submit">Search</button>
+</form>
+
+@if (!Model.Any())
+{
+    <div class="empty-state">No announcements yet.</div>
+}
+else
+{
+    <div class="announcement-list">
+        @foreach (var item in Model)
+        {
+            <article class="panel announcement-item">
+                <div>
+                    <h2>@item.Title</h2>
+                    <p>@item.Message</p>
+                    <span>Posted by @item.CreatedBy?.FullName on @item.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy")</span>
+                </div>
+                @if (User.IsInRole("Admin") || User.IsInRole("Teacher"))
+                {
+                    <div class="button-row">
+                        <a class="btn btn-sm btn-outline-primary" asp-action="Edit" asp-route-id="@item.AnnouncementId">Edit</a>
+                        <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@item.AnnouncementId">Delete</a>
+                    </div>
+                }
+            </article>
+        }
+    </div>
+}

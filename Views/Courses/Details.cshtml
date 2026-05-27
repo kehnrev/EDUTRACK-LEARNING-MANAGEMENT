@@ -1,0 +1,92 @@
+@model Course
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="dashboard-heading">
+    <div>
+        <span class="eyebrow">@Model.Subject - @Model.GradeLevel</span>
+        <h1>@Model.Title</h1>
+        <p>@Model.Description</p>
+    </div>
+    <div class="button-row">
+        <a class="btn btn-outline-primary" asp-action="Index">Back</a>
+        @if (User.IsInRole("Admin") || User.IsInRole("Teacher"))
+        {
+            <a class="btn btn-primary" asp-controller="Lessons" asp-action="Create" asp-route-courseId="@Model.CourseId">Add Lesson</a>
+            <a class="btn btn-primary" asp-controller="Assessments" asp-action="Create" asp-route-courseId="@Model.CourseId">Add Assessment</a>
+        }
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card"><span>Teacher</span><strong>@Model.Teacher?.FullName</strong></div>
+    <div class="stat-card"><span>Lessons</span><strong>@Model.Lessons.Count</strong></div>
+    <div class="stat-card"><span>Assessments</span><strong>@Model.Assessments.Count</strong></div>
+    <div class="stat-card"><span>Enrolled students</span><strong>@Model.Enrollments.Count</strong></div>
+</div>
+
+<div class="dashboard-grid">
+    <section class="panel">
+        <h2>Lessons</h2>
+        @if (!Model.Lessons.Any())
+        {
+            <p class="empty-copy">No lessons yet.</p>
+        }
+        else
+        {
+            <div class="list-stack">
+                @foreach (var lesson in Model.Lessons)
+                {
+                    <div>
+                        <strong>@lesson.Title</strong>
+                        <span>@(lesson.IsAvailableOffline ? "Available offline" : "Online only")</span>
+                        <a asp-controller="Lessons" asp-action="Details" asp-route-id="@lesson.LessonId">Open</a>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+    <section class="panel">
+        <h2>Assessments</h2>
+        @if (!Model.Assessments.Any())
+        {
+            <p class="empty-copy">No assessments yet.</p>
+        }
+        else
+        {
+            <div class="list-stack">
+                @foreach (var assessment in Model.Assessments)
+                {
+                    <div>
+                        <strong>@assessment.Title</strong>
+                        <span>Due @assessment.DueDate.ToString("MMM dd, yyyy")</span>
+                        <a asp-controller="Assessments" asp-action="Details" asp-route-id="@assessment.AssessmentId">Open</a>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+</div>
+
+@if (User.IsInRole("Admin") || User.IsInRole("Teacher"))
+{
+    <section class="panel mt-4">
+        <h2>Enrollments</h2>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th>Student</th><th>Completion</th><th>Date</th></tr></thead>
+                <tbody>
+                    @foreach (var enrollment in Model.Enrollments)
+                    {
+                        <tr>
+                            <td>@enrollment.Student?.FullName</td>
+                            <td>@enrollment.CompletionPercentage%</td>
+                            <td>@enrollment.EnrollmentDate.ToLocalTime().ToString("MMM dd, yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}

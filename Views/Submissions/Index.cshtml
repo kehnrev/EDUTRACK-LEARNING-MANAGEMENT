@@ -1,0 +1,52 @@
+@model IEnumerable<Submission>
+@{
+    var isStudent = User.IsInRole("Student");
+    ViewData["Title"] = isStudent ? "Scores" : "Submissions";
+}
+
+<div class="dashboard-heading">
+    <div>
+        <span class="eyebrow">Assessment records</span>
+        <h1>@(isStudent ? "Scores" : "Submissions")</h1>
+    </div>
+</div>
+
+<form class="toolbar-form" method="get">
+    <input type="hidden" name="assessmentId" value="@ViewBag.AssessmentId" />
+    <input class="form-control" name="search" value="@ViewBag.Search" placeholder="Search student or assessment" />
+    <button class="btn btn-outline-primary" type="submit">Search</button>
+</form>
+
+@if (!Model.Any())
+{
+    <div class="empty-state">No scores available yet. Complete an assessment first to view your performance record.</div>
+}
+else
+{
+    <div class="table-responsive panel">
+        <table class="table align-middle">
+            <thead><tr><th>Student</th><th>Course</th><th>Assessment</th><th>Score</th><th>Total points</th><th>Percentage</th><th>Performance</th><th>Status</th><th>Submitted</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    var totalPoints = item.Assessment?.TotalPoints ?? 0;
+                    var scorePoints = totalPoints == 0 ? 0 : Math.Round(item.Score / 100m * totalPoints, 2);
+                    var badgeClass = item.Status == SubmissionStatus.Synced ? "text-bg-success" : "text-bg-warning";
+
+                    <tr>
+                        <td>@item.Student?.FullName</td>
+                        <td>@item.Assessment?.Course?.Title</td>
+                        <td>@item.Assessment?.Title</td>
+                        <td>@scorePoints.ToString("0.##")</td>
+                        <td>@totalPoints</td>
+                        <td>@item.Score.ToString("0.##")%</td>
+                        <td><span class="badge @PerformanceLabelHelper.GetBadgeClass(item.Score)">@PerformanceLabelHelper.GetLabel(item.Score)</span></td>
+                        <td><span class="badge @badgeClass">@item.Status</span></td>
+                        <td>@item.SubmittedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</td>
+                        <td class="text-end"><a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@item.SubmissionId">Open</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

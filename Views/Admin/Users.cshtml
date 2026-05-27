@@ -1,0 +1,60 @@
+@model IEnumerable<ApplicationUser>
+@{
+    ViewData["Title"] = "Manage Users";
+}
+
+<div class="dashboard-heading">
+    <div>
+        <span class="eyebrow">Administration</span>
+        <h1>Manage users</h1>
+    </div>
+    <a class="btn btn-primary" asp-action="CreateUser">Create User</a>
+</div>
+
+<form class="toolbar-form" method="get">
+    <input class="form-control" name="search" value="@ViewBag.Search" placeholder="Search name or email" />
+    <select class="form-select" name="role">
+        <option value="">All roles</option>
+        @foreach (UserRole role in Enum.GetValues<UserRole>())
+        {
+            if (ViewBag.Role == role)
+            {
+                <option value="@role" selected>@role</option>
+            }
+            else
+            {
+                <option value="@role">@role</option>
+            }
+        }
+    </select>
+    <button class="btn btn-outline-primary" type="submit">Filter</button>
+</form>
+
+<div class="table-responsive panel">
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.FullName</td>
+                    <td>@user.Email</td>
+                    <td><span class="badge text-bg-primary">@user.Role</span></td>
+                    <td>@(user.IsActive ? "Active" : "Inactive")</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary" asp-action="EditUser" asp-route-id="@user.Id">Edit</a>
+                        <a class="btn btn-sm btn-outline-danger" asp-action="DeleteUser" asp-route-id="@user.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

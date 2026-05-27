@@ -1,0 +1,14 @@
+@model Question
+@{
+    ViewData["Title"] = "Delete Question";
+}
+
+<section class="panel delete-panel">
+    <h1>Delete question?</h1>
+    <p>@Model.QuestionText</p>
+    <form asp-action="Delete" method="post">
+        <input type="hidden" name="id" value="@Model.QuestionId" />
+        <a class="btn btn-outline-primary" asp-action="Index" asp-route-assessmentId="@Model.AssessmentId">Cancel</a>
+        <button class="btn btn-danger" type="submit">Confirm Delete</button>
+    </form>
+</section>

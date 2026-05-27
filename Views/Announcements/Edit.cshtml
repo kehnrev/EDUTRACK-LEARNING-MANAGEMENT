@@ -1,0 +1,25 @@
+@model Announcement
+@{
+    ViewData["Title"] = "Edit Announcement";
+}
+
+<div class="dashboard-heading">
+    <div>
+        <span class="eyebrow">Announcements</span>
+        <h1>Edit announcement</h1>
+    </div>
+    <a class="btn btn-outline-primary" asp-action="Index">Back</a>
+</div>
+
+<section class="panel form-panel">
+    <form asp-action="Edit" method="post" novalidate>
+        <input asp-for="AnnouncementId" type="hidden" />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <partial name="_AnnouncementForm" model="Model" />
+        <button class="btn btn-primary mt-4" type="submit">Update Announcement</button>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

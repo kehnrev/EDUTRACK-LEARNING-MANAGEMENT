@@ -1,0 +1,46 @@
+@model Question
+
+<div class="row g-3">
+    <div class="col-md-8">
+        <label asp-for="AssessmentId" class="form-label"></label>
+        <select asp-for="AssessmentId" class="form-select" asp-items="ViewBag.Assessments">
+            <option value="">Choose assessment</option>
+        </select>
+        <span asp-validation-for="AssessmentId" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Points" class="form-label"></label>
+        <input asp-for="Points" class="form-control" />
+        <span asp-validation-for="Points" class="text-danger"></span>
+    </div>
+    <div class="col-12">
+        <label asp-for="QuestionText" class="form-label"></label>
+        <textarea asp-for="QuestionText" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="QuestionText" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="OptionA" class="form-label"></label>
+        <input asp-for="OptionA" class="form-control" />
+        <span asp-validation-for="OptionA" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="OptionB" class="form-label"></label>
+        <input asp-for="OptionB" class="form-control" />
+        <span asp-validation-for="OptionB" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="OptionC" class="form-label"></label>
+        <input asp-for="OptionC" class="form-control" />
+        <span asp-validation-for="OptionC" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="OptionD" class="form-label"></label>
+        <input asp-for="OptionD" class="form-control" />
+        <span asp-validation-for="OptionD" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="CorrectAnswer" class="form-label"></label>
+        <select asp-for="CorrectAnswer" class="form-select" asp-items="ViewBag.AnswerOptions"></select>
+        <span asp-validation-for="CorrectAnswer" class="text-danger"></span>
+    </div>
+</div>

@@ -1,0 +1,89 @@
+@{
+    ViewData["Title"] = "Improve Student Learning";
+}
+
+<section class="hero-section">
+    <div class="container hero-grid">
+        <div class="hero-copy">
+            <span class="eyebrow">SDG 4 aligned learning platform</span>
+            <h1>Improve Student Learning Through Smart Analytics</h1>
+            <p class="hero-subtitle">
+                EduTrack helps teachers monitor student performance, manage learning materials,
+                and conduct online or offline assessments with automatic scoring and clear progress insights.
+            </p>
+            <div class="hero-actions">
+                <a class="btn btn-primary btn-lg" asp-controller="Account" asp-action="Register">Get Started</a>
+                <a class="btn btn-outline-primary btn-lg" asp-controller="Home" asp-action="Features">View Features</a>
+            </div>
+            <div class="trust-strip">
+                <span>Role-based dashboards</span>
+                <span>Offline-first assessments</span>
+                <span>Printable reports</span>
+            </div>
+        </div>
+        <div class="hero-media">
+            <img src="~/images/hero-dashboard.png" alt="EduTrack dashboard preview" />
+        </div>
+    </div>
+</section>
+
+<section class="section-pad">
+    <div class="container">
+        <div class="section-heading">
+            <span class="eyebrow">Platform preview</span>
+            <h2>Everything a school needs to keep learning visible</h2>
+        </div>
+        <div class="feature-grid">
+            <article class="feature-card">
+                <span class="feature-icon">LA</span>
+                <h3>Learning Analytics</h3>
+                <p>Track averages, completion, pass rates, and students needing support.</p>
+            </article>
+            <article class="feature-card">
+                <span class="feature-icon">QA</span>
+                <h3>Online and Offline Assessments</h3>
+                <p>Students can answer quizzes offline and sync submissions when internet returns.</p>
+            </article>
+            <article class="feature-card">
+                <span class="feature-icon">SP</span>
+                <h3>Student Performance Monitoring</h3>
+                <p>Score history, progress charts, and reports help teachers respond quickly.</p>
+            </article>
+            <article class="feature-card">
+                <span class="feature-icon">CM</span>
+                <h3>LMS Course Management</h3>
+                <p>Create courses, lessons, announcements, assessments, and enrollments in one place.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="sdg-band">
+    <div class="container split-section">
+        <div>
+            <span class="eyebrow">Quality Education</span>
+            <h2>Built for SDG 4</h2>
+            <p>
+                EduTrack supports inclusive and equitable quality education by giving schools tools
+                to continue instruction even in low-connectivity environments, identify learning gaps, and
+                provide timely support to every learner.
+            </p>
+        </div>
+        <div class="benefit-list">
+            <div>Track student progress</div>
+            <div>Identify struggling learners</div>
+            <div>Manage lessons and assessments</div>
+            <div>Continue learning without internet</div>
+        </div>
+    </div>
+</section>
+
+<section class="section-pad">
+    <div class="container conversion-panel">
+        <div>
+            <h2>Ready to monitor learning with confidence?</h2>
+            <p>Start with dashboards for administrators, teachers, and students, then expand into reports and offline access.</p>
+        </div>
+        <a class="btn btn-primary btn-lg" asp-controller="Account" asp-action="Login">Login to Demo</a>
+    </div>
+</section>

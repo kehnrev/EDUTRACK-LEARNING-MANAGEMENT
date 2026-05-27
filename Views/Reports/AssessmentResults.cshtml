@@ -1,0 +1,17 @@
+@model IEnumerable<Submission>
+@{
+    var summary = ViewBag.Summary as ReportSummaryViewModel;
+    ViewData["Title"] = "Assessment Result Report";
+}
+
+<partial name="_ReportHeader" model="summary" />
+
+<form class="toolbar-form no-print" method="get">
+    <select class="form-select" name="assessmentId" asp-items="ViewBag.Assessments">
+        <option value="">All assessments</option>
+    </select>
+    <button class="btn btn-outline-primary" type="submit">Generate</button>
+    <button class="btn btn-primary" type="button" onclick="window.print()">Print</button>
+</form>
+
+<partial name="_SubmissionReportTable" model="Model" />

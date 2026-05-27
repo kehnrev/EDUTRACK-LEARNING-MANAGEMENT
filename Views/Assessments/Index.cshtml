@@ -1,0 +1,74 @@
+@using System.Security.Claims
+@model IEnumerable<Assessment>
+@{
+    ViewData["Title"] = "Assessments";
+    var currentStudentId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsedStudentId) ? parsedStudentId : 0;
+    var isStudent = User.IsInRole("Student");
+}
+
+<div class="dashboard-heading">
+    <div>
+        <span class="eyebrow">Assessments</span>
+        <h1>Quizzes and checks</h1>
+    </div>
+    @if (User.IsInRole("Admin") || User.IsInRole("Teacher"))
+    {
+        <a class="btn btn-primary" asp-action="Create" asp-route-courseId="@ViewBag.CourseId">Create Assessment</a>
+    }
+</div>
+
+<form class="toolbar-form" method="get">
+    <input type="hidden" name="courseId" value="@ViewBag.CourseId" />
+    <input class="form-control" name="search" value="@ViewBag.Search" placeholder="Search assessments" />
+    <button class="btn btn-outline-primary" type="submit">Search</button>
+</form>
+
+@if (!Model.Any())
+{
+    <div class="empty-state">No assessments available yet. Please check again after your teacher posts a quiz.</div>
+}
+else
+{
+    <div class="table-responsive panel">
+        <table class="table align-middle">
+            <thead><tr><th>Title</th><th>Course</th><th>Questions</th><th>Due</th>@if (isStudent) { <th>Status</th> }<th>Offline</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    var submission = item.Submissions.FirstOrDefault(s => s.StudentId == currentStudentId);
+                    var isCompleted = submission != null;
+
+                    <tr>
+                        <td>@item.Title</td>
+                        <td>@item.Course?.Title</td>
+                        <td>@item.Questions.Count</td>
+                        <td>@item.DueDate.ToString("MMM dd, yyyy")</td>
+                        @if (isStudent)
+                        {
+                            <td><span class="badge @(isCompleted ? "text-bg-success" : "text-bg-primary")">@(isCompleted ? "Completed" : "Upcoming")</span></td>
+                        }
+                        <td><span class="badge @(item.IsAvailableOffline ? "text-bg-success" : "text-bg-secondary")">@(item.IsAvailableOffline ? "Available Offline" : "Online Only")</span></td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@item.AssessmentId">Open</a>
+                            @if (User.IsInRole("Student"))
+                            {
+                                if (submission == null)
+                                {
+                                    <a class="btn btn-sm btn-primary" asp-action="Take" asp-route-id="@item.AssessmentId">Take</a>
+                                }
+                                else
+                                {
+                                    <a class="btn btn-sm btn-primary" asp-controller="Submissions" asp-action="Details" asp-route-id="@submission.SubmissionId">Score</a>
+                                }
+                            }
+                            @if (User.IsInRole("Admin") || User.IsInRole("Teacher"))
+                            {
+                                <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@item.AssessmentId">Edit</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

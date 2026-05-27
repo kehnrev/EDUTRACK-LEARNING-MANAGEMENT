@@ -1,0 +1,14 @@
+@model Enrollment
+@{
+    ViewData["Title"] = "Remove Enrollment";
+}
+
+<section class="panel delete-panel">
+    <h1>Remove enrollment?</h1>
+    <p>Remove <strong>@Model.Student?.FullName</strong> from <strong>@Model.Course?.Title</strong>.</p>
+    <form asp-action="Delete" method="post">
+        <input type="hidden" name="id" value="@Model.EnrollmentId" />
+        <a class="btn btn-outline-primary" asp-action="Index" asp-route-courseId="@Model.CourseId">Cancel</a>
+        <button class="btn btn-danger" type="submit">Confirm Remove</button>
+    </form>
+</section>

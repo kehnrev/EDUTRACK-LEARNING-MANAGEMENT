@@ -1,0 +1,73 @@
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    var enrollmentLabels = string.Join(",", Model.CourseEnrollmentSummary.Keys.Select(ChartLabelHelper.GetShortCourseLabel));
+    var enrollmentFullLabels = string.Join(",", Model.CourseEnrollmentSummary.Keys);
+    var enrollmentValues = string.Join(",", Model.CourseEnrollmentSummary.Values);
+    var passFailLabels = string.Join(",", Model.PassFailDistribution.Keys);
+    var passFailValues = string.Join(",", Model.PassFailDistribution.Values);
+}
+
+<div class="dashboard-heading">
+    <div>
+        <span class="eyebrow">Admin dashboard</span>
+        <h1>System-wide learning overview</h1>
+    </div>
+    <a class="btn btn-primary" asp-controller="Admin" asp-action="CreateUser">Create User</a>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card"><span>Total students</span><strong>@Model.TotalStudents</strong></div>
+    <div class="stat-card"><span>Total teachers</span><strong>@Model.TotalTeachers</strong></div>
+    <div class="stat-card"><span>Total courses</span><strong>@Model.TotalCourses</strong></div>
+    <div class="stat-card"><span>Assessments</span><strong>@Model.TotalAssessments</strong></div>
+    <div class="stat-card"><span>Average performance</span><strong>@Model.OverallAveragePerformance.ToString("0.##")%</strong></div>
+    <div class="stat-card"><span>Pending sync</span><strong>@Model.PendingSyncSubmissions</strong></div>
+</div>
+
+<div class="alert alert-info">
+    <strong>Demo Data:</strong> This presentation build includes Grade 11 and Grade 12 sample users, courses, lessons, assessments, submissions, announcements, and reports.
+</div>
+
+<section class="notification-strip" aria-label="Admin notifications">
+    <div><strong>Announcement posted</strong><span>Three demo announcements are available for presentation.</span></div>
+    <div><strong>Score released</strong><span>Student submissions feed the analytics and printable reports.</span></div>
+    <div><strong>Offline sync status</strong><span>@(Model.PendingSyncSubmissions > 0 ? "There are pending sync submissions to review." : "All offline submissions are synced.")</span></div>
+</section>
+
+<div class="dashboard-grid">
+    <section class="panel">
+        <h2>Overall Student Performance</h2>
+        <canvas class="analytics-chart" data-chart="bar" data-title="Overall Student Performance" data-labels="Average,Target" data-full-labels="Overall Average,Target Score" data-values="@Model.OverallAveragePerformance,75" data-scale-max="100" data-tooltip-label="Score" data-empty="No student performance data yet." height="260"></canvas>
+    </section>
+    <section class="panel">
+        <h2>Recent announcements</h2>
+        @if (!Model.RecentAnnouncements.Any())
+        {
+            <p class="empty-copy">No announcements yet.</p>
+        }
+        else
+        {
+            <div class="list-stack">
+                @foreach (var item in Model.RecentAnnouncements)
+                {
+                    <div>
+                        <strong>@item.Title</strong>
+                        <span>@item.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy") by @item.CreatedBy?.FullName</span>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+</div>
+
+<div class="dashboard-grid mt-4">
+    <section class="panel">
+        <h2>Course Enrollment Summary</h2>
+        <canvas class="analytics-chart" data-chart="horizontalBar" data-title="Course Enrollment Summary" data-labels="@enrollmentLabels" data-full-labels="@enrollmentFullLabels" data-values="@enrollmentValues" data-empty="No enrollment data yet." height="320"></canvas>
+    </section>
+    <section class="panel">
+        <h2>Pass/Fail Distribution</h2>
+        <canvas class="analytics-chart" data-chart="doughnut" data-title="Pass and Fail Distribution" data-labels="@passFailLabels" data-values="@passFailValues" data-empty="No pass/fail data yet." height="260"></canvas>
+    </section>
+</div>

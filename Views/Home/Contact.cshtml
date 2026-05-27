@@ -1,0 +1,47 @@
+@model ContactViewModel
+@{
+    ViewData["Title"] = "Support";
+}
+
+<section class="page-hero compact">
+    <div class="container">
+        <span class="eyebrow">Contact and support</span>
+        <h1>Need help using EduTrack?</h1>
+        <p>Send a support request and the project team will follow up.</p>
+    </div>
+</section>
+
+<section class="section-pad">
+    <div class="container form-shell">
+        <form asp-action="Contact" method="post" novalidate>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Subject" class="form-label"></label>
+                    <input asp-for="Subject" class="form-control" />
+                    <span asp-validation-for="Subject" class="text-danger"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Message" class="form-label"></label>
+                    <textarea asp-for="Message" class="form-control" rows="6"></textarea>
+                    <span asp-validation-for="Message" class="text-danger"></span>
+                </div>
+            </div>
+            <button class="btn btn-primary mt-4" type="submit">Send Message</button>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

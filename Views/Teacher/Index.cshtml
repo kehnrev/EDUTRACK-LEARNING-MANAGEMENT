@@ -1,0 +1,98 @@
+@model TeacherDashboardViewModel
+@{
+    ViewData["Title"] = "Teacher Dashboard";
+    var courseAverageLabels = string.Join(",", Model.ClassAverageByCourse.Keys.Select(ChartLabelHelper.GetShortCourseLabel));
+    var courseAverageFullLabels = string.Join(",", Model.ClassAverageByCourse.Keys);
+    var courseAverageValues = string.Join(",", Model.ClassAverageByCourse.Values);
+    var submissionLabels = string.Join(",", Model.SubmissionStatusSummary.Keys);
+    var submissionValues = string.Join(",", Model.SubmissionStatusSummary.Values);
+}
+
+<div class="dashboard-heading">
+    <div>
+        <span class="eyebrow">Teacher dashboard</span>
+        <h1>Class performance and learning activity</h1>
+    </div>
+    <a class="btn btn-primary" asp-controller="Courses" asp-action="Create">Create Course</a>
+</div>
+
+<div class="quick-action-heading">Quick actions</div>
+<div class="quick-actions">
+    <a class="btn btn-primary" asp-controller="Courses" asp-action="Create">Create Course</a>
+    <a class="btn btn-outline-primary" asp-controller="Lessons" asp-action="Create">Add Lesson</a>
+    <a class="btn btn-outline-primary" asp-controller="Assessments" asp-action="Create">Create Assessment</a>
+    <a class="btn btn-outline-primary" asp-controller="Reports" asp-action="ClassPerformance">View Reports</a>
+    <a class="btn btn-outline-primary" asp-controller="Announcements" asp-action="Create">Post Announcement</a>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card"><span>My courses</span><strong>@Model.MyCourses</strong></div>
+    <div class="stat-card"><span>Students enrolled</span><strong>@Model.TotalStudentsEnrolled</strong></div>
+    <div class="stat-card"><span>Pending submissions</span><strong>@Model.PendingSubmissions</strong></div>
+    <div class="stat-card"><span>Average class score</span><strong>@Model.AverageClassScore.ToString("0.##")%</strong></div>
+    <div class="stat-card"><span>Class status</span><strong><span class="badge @PerformanceLabelHelper.GetBadgeClass(Model.AverageClassScore)">@PerformanceLabelHelper.GetLabel(Model.AverageClassScore)</span></strong></div>
+</div>
+
+<section class="notification-strip" aria-label="Teacher notifications">
+    <div><strong>Announcement posted</strong><span>Recent announcements are visible to enrolled learners.</span></div>
+    <div><strong>New lesson available</strong><span>Offline-ready materials help students continue learning without internet.</span></div>
+    <div><strong>New assessment posted</strong><span>Upcoming quizzes are listed in student dashboards.</span></div>
+</section>
+
+<div class="dashboard-grid">
+    <section class="panel">
+        <h2>Class Average by Course</h2>
+        @if (!Model.ClassAverageByCourse.Any())
+        {
+            <p class="empty-copy">No class score data yet. Students need to complete assessments before averages appear.</p>
+        }
+        else
+        {
+            <canvas class="analytics-chart" data-chart="horizontalBar" data-title="Class Average by Course" data-labels="@courseAverageLabels" data-full-labels="@courseAverageFullLabels" data-values="@courseAverageValues" data-scale-max="100" data-tooltip-label="Average" data-empty="No class score data yet. Students need to complete assessments before averages appear." height="320"></canvas>
+        }
+    </section>
+    <section class="panel">
+        <h2>Students Needing Support</h2>
+        @if (!Model.StudentsNeedingImprovement.Any())
+        {
+            <p class="empty-copy">No at-risk learners found from current data.</p>
+        }
+        else
+        {
+            <div class="list-stack">
+                @foreach (var student in Model.StudentsNeedingImprovement.Take(6))
+                {
+                    <div>
+                        <strong>@student.FullName</strong>
+                        <span>@student.Email - low scores, missing submissions, or low course progress</span>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+</div>
+
+<section class="panel mt-4">
+    <h2>Assessment Submission Status</h2>
+    <canvas class="analytics-chart" data-chart="doughnut" data-title="Assessment Submission Status" data-labels="@submissionLabels" data-values="@submissionValues" data-empty="No submission status data yet." height="260"></canvas>
+</section>
+
+<section class="panel mt-4">
+    <h2>Recent assessments</h2>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead><tr><th>Assessment</th><th>Course</th><th>Due</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var item in Model.RecentAssessments)
+                {
+                    <tr>
+                        <td>@item.Title</td>
+                        <td>@item.Course?.Title</td>
+                        <td>@item.DueDate.ToString("MMM dd, yyyy")</td>
+                        <td class="text-end"><a class="btn btn-sm btn-outline-primary" asp-controller="Assessments" asp-action="Details" asp-route-id="@item.AssessmentId">Open</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

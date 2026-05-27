@@ -1,0 +1,76 @@
+@model OfflineLibraryViewModel
+@{
+    ViewData["Title"] = "Offline Learning Library";
+}
+
+<div class="dashboard-heading">
+    <div>
+        <span class="eyebrow">Offline and PWA support</span>
+        <h1>Offline Learning Library</h1>
+        <p>Review which lessons and assessments can be used during low-connectivity learning.</p>
+    </div>
+    <a class="btn btn-outline-primary" asp-controller="Student" asp-action="Index">Back to Dashboard</a>
+</div>
+
+<section class="panel">
+    <h2>Offline-ready lessons</h2>
+    @if (!Model.Lessons.Any())
+    {
+        <p class="empty-copy">No lessons are available yet. Ask your teacher to add learning materials for your enrolled courses.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th>Lesson</th><th>Course</th><th>Offline status</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var lesson in Model.Lessons)
+                    {
+                        <tr data-offline-lesson-row data-lesson-id="@lesson.LessonId" data-offline-enabled="@lesson.IsAvailableOffline.ToString().ToLowerInvariant()">
+                            <td>@lesson.Title</td>
+                            <td>@lesson.Course?.Title</td>
+                            <td>
+                                <span class="badge @(lesson.IsAvailableOffline ? "text-bg-success" : "text-bg-secondary")" data-offline-status>
+                                    @(lesson.IsAvailableOffline ? "Available Offline" : "Needs Internet")
+                                </span>
+                            </td>
+                            <td class="text-end"><a class="btn btn-sm btn-outline-primary" asp-controller="Lessons" asp-action="Details" asp-route-id="@lesson.LessonId">Open</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="panel mt-4">
+    <h2>Offline-ready assessments</h2>
+    @if (!Model.Assessments.Any())
+    {
+        <p class="empty-copy">No assessments are available yet. Please check again after your teacher posts a quiz.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th>Assessment</th><th>Course</th><th>Due</th><th>Offline status</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var assessment in Model.Assessments)
+                    {
+                        <tr data-offline-assessment-row data-assessment-id="@assessment.AssessmentId" data-offline-enabled="@assessment.IsAvailableOffline.ToString().ToLowerInvariant()">
+                            <td>@assessment.Title</td>
+                            <td>@assessment.Course?.Title</td>
+                            <td>@assessment.DueDate.ToString("MMM dd, yyyy")</td>
+                            <td>
+                                <span class="badge @(assessment.IsAvailableOffline ? "text-bg-success" : "text-bg-secondary")" data-offline-status>
+                                    @(assessment.IsAvailableOffline ? "Available Offline" : "Needs Internet")
+                                </span>
+                            </td>
+                            <td class="text-end"><a class="btn btn-sm btn-outline-primary" asp-controller="Assessments" asp-action="Details" asp-route-id="@assessment.AssessmentId">Open</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

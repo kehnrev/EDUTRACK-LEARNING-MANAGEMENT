@@ -1,0 +1,51 @@
+@model IEnumerable<Enrollment>
+@{
+    ViewData["Title"] = "Course Completion Report";
+}
+
+<section class="report-header">
+    <div>
+        <span class="eyebrow">Printable report</span>
+        <h1>Course Completion Report</h1>
+        <p>Date generated: @ViewBag.GeneratedAt.ToString("MMM dd, yyyy h:mm tt")</p>
+    </div>
+    <div class="report-summary">
+        <strong>@ViewBag.AverageCompletion%</strong>
+        <span>Average completion</span>
+    </div>
+</section>
+
+<form class="toolbar-form no-print" method="get">
+    <select class="form-select" name="courseId" asp-items="ViewBag.Courses">
+        <option value="">All courses</option>
+    </select>
+    <button class="btn btn-outline-primary" type="submit">Generate</button>
+    <button class="btn btn-primary" type="button" onclick="window.print()">Print</button>
+</form>
+
+<section class="panel">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead><tr><th>Course</th><th>Student</th><th>Teacher</th><th>Completion</th><th>Progress status</th><th>Enrolled</th></tr></thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No course completion data yet. Enroll students in courses to generate this report.</td>
+                    </tr>
+                }
+                @foreach (var row in Model)
+                {
+                    <tr>
+                        <td>@row.Course?.Title</td>
+                        <td>@row.Student?.FullName</td>
+                        <td>@row.Course?.Teacher?.FullName</td>
+                        <td>@row.CompletionPercentage%</td>
+                        <td><span class="badge @PerformanceLabelHelper.GetBadgeClass(row.CompletionPercentage)">@PerformanceLabelHelper.GetLabel(row.CompletionPercentage)</span></td>
+                        <td>@row.EnrollmentDate.ToLocalTime().ToString("MMM dd, yyyy")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

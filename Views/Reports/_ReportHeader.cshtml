@@ -1,0 +1,15 @@
+@model ReportSummaryViewModel
+
+<section class="report-header">
+    <div>
+        <span class="eyebrow">Printable report</span>
+        <h1>@Model?.Title</h1>
+        <p>Date generated: @Model?.DateGenerated.ToString("MMM dd, yyyy h:mm tt")</p>
+    </div>
+    <div class="report-summary-grid">
+        <div><strong>@Model?.TotalRows</strong><span>Rows</span></div>
+        <div><strong>@Model?.AverageScore.ToString("0.##")%</strong><span>Average</span></div>
+        <div><strong>@Model?.PassedCount</strong><span>Passed</span></div>
+        <div><strong>@Model?.FailedCount</strong><span>Needs support</span></div>
+    </div>
+</section>

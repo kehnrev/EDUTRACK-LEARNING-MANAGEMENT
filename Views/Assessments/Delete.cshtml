@@ -1,0 +1,14 @@
+@model Assessment
+@{
+    ViewData["Title"] = "Delete Assessment";
+}
+
+<section class="panel delete-panel">
+    <h1>Delete assessment?</h1>
+    <p>This will remove <strong>@Model.Title</strong> if it has no locked submissions.</p>
+    <form asp-action="Delete" method="post">
+        <input type="hidden" name="id" value="@Model.AssessmentId" />
+        <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@Model.AssessmentId">Cancel</a>
+        <button class="btn btn-danger" type="submit">Confirm Delete</button>
+    </form>
+</section>

@@ -1,0 +1,55 @@
+@model Submission
+@{
+    ViewData["Title"] = "Submission Details";
+    var totalPoints = Model.Assessment?.TotalPoints ?? Model.StudentAnswers.Sum(a => a.Question?.Points ?? 0);
+    var earnedPoints = totalPoints == 0 ? 0 : Math.Round(Model.Score / 100m * totalPoints, 2);
+    var passed = Model.Score >= 75;
+    var performanceLabel = PerformanceLabelHelper.GetLabel(Model.Score);
+}
+
+<div class="dashboard-heading">
+    <div>
+        <span class="eyebrow">@Model.Assessment?.Course?.Title</span>
+        <h1>@Model.Assessment?.Title</h1>
+        <p>@Model.Student?.FullName - submitted @Model.SubmittedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</p>
+    </div>
+    <a class="btn btn-outline-primary" asp-action="Index">Back</a>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card"><span>Score</span><strong>@earnedPoints.ToString("0.##") / @totalPoints</strong></div>
+    <div class="stat-card"><span>Percentage</span><strong>@Model.Score.ToString("0.##")%</strong></div>
+    <div class="stat-card"><span>Passed/Failed</span><strong><span class="badge @(passed ? "text-bg-success" : "text-bg-danger")">@(passed ? "Passed" : "Failed")</span></strong></div>
+    <div class="stat-card"><span>Performance</span><strong><span class="badge @PerformanceLabelHelper.GetBadgeClass(Model.Score)">@performanceLabel</span></strong></div>
+    <div class="stat-card"><span>Sync status</span><strong>@Model.Status</strong></div>
+    <div class="stat-card"><span>Answers</span><strong>@Model.StudentAnswers.Count</strong></div>
+</div>
+
+<section class="panel mt-4">
+    <h2>Auto-score feedback</h2>
+    <p class="feedback-copy">
+        Your score is @earnedPoints.ToString("0.##")/@totalPoints or @Model.Score.ToString("0.##")%.
+        Status: @(passed ? "Passed" : "Failed").
+        Recommendation: @PerformanceLabelHelper.GetRecommendation(Model.Score)
+    </p>
+</section>
+
+<section class="panel mt-4">
+    <h2>Answer review</h2>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead><tr><th>Question</th><th>Selected</th><th>Correct</th><th>Points</th></tr></thead>
+            <tbody>
+                @foreach (var answer in Model.StudentAnswers)
+                {
+                    <tr>
+                        <td>@answer.Question?.QuestionText</td>
+                        <td>@answer.SelectedAnswer</td>
+                        <td><span class="badge @(answer.IsCorrect ? "text-bg-success" : "text-bg-danger")">@(answer.IsCorrect ? "Yes" : "No")</span></td>
+                        <td>@answer.PointsEarned.ToString("0.##")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

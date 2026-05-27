@@ -1,0 +1,24 @@
+@model Question
+@{
+    ViewData["Title"] = "Add Question";
+}
+
+<div class="dashboard-heading">
+    <div>
+        <span class="eyebrow">Assessment builder</span>
+        <h1>Add question</h1>
+    </div>
+    <a class="btn btn-outline-primary" asp-controller="Assessments" asp-action="Details" asp-route-id="@Model.AssessmentId">Back</a>
+</div>
+
+<section class="panel form-panel">
+    <form asp-action="Create" method="post" novalidate>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <partial name="_QuestionForm" model="Model" />
+        <button class="btn btn-primary mt-4" type="submit">Save Question</button>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

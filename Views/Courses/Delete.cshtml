@@ -1,0 +1,14 @@
+@model Course
+@{
+    ViewData["Title"] = "Delete Course";
+}
+
+<section class="panel delete-panel">
+    <h1>Delete course?</h1>
+    <p>This will remove <strong>@Model.Title</strong> and related lessons and assessments where allowed.</p>
+    <form asp-action="Delete" method="post">
+        <input type="hidden" name="id" value="@Model.CourseId" />
+        <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@Model.CourseId">Cancel</a>
+        <button class="btn btn-danger" type="submit">Confirm Delete</button>
+    </form>
+</section>

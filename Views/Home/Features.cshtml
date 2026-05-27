@@ -1,0 +1,37 @@
+@{
+    ViewData["Title"] = "Features";
+}
+
+<section class="page-hero compact">
+    <div class="container">
+        <span class="eyebrow">Features</span>
+        <h1>A complete learning platform for management, assessment, and analytics</h1>
+        <p>Designed for administrators, teachers, and students with responsive dashboards and offline support.</p>
+    </div>
+</section>
+
+<section class="section-pad">
+    <div class="container feature-list-grid">
+        @{
+            var features = new[]
+            {
+                "Course and lesson management",
+                "Student dashboard",
+                "Teacher dashboard",
+                "Assessment creation",
+                "Student assessment taking",
+                "Automatic scoring",
+                "Performance analytics",
+                "Offline access",
+                "Sync when internet returns"
+            };
+        }
+        @foreach (var feature in features)
+        {
+            <div class="feature-row">
+                <span class="checkmark">✓</span>
+                <span>@feature</span>
+            </div>
+        }
+    </div>
+</section>

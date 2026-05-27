@@ -1,0 +1,78 @@
+@model IEnumerable<Course>
+@{
+    ViewData["Title"] = "Courses";
+}
+
+<div class="dashboard-heading">
+    <div>
+        <span class="eyebrow">Course management</span>
+        <h1>Courses</h1>
+    </div>
+    @if (User.IsInRole("Admin") || User.IsInRole("Teacher"))
+    {
+        <a class="btn btn-primary" asp-action="Create">Create Course</a>
+    }
+</div>
+
+<form class="toolbar-form" method="get">
+    <input class="form-control" name="search" value="@ViewBag.Search" placeholder="Search courses" />
+    <select class="form-select" name="subject">
+        <option value="">All subjects</option>
+        @foreach (string item in ViewBag.Subjects)
+        {
+            if (ViewBag.Subject == item)
+            {
+                <option value="@item" selected>@item</option>
+            }
+            else
+            {
+                <option value="@item">@item</option>
+            }
+        }
+    </select>
+    <select class="form-select" name="gradeLevel">
+        <option value="">All grades</option>
+        @foreach (string item in ViewBag.GradeLevels)
+        {
+            if (ViewBag.GradeLevel == item)
+            {
+                <option value="@item" selected>@item</option>
+            }
+            else
+            {
+                <option value="@item">@item</option>
+            }
+        }
+    </select>
+    <button class="btn btn-outline-primary" type="submit">Filter</button>
+</form>
+
+@if (!Model.Any())
+{
+    <div class="empty-state">No courses found yet. Ask your teacher or admin to enroll you in a Grade 11 or Grade 12 course.</div>
+}
+else
+{
+    <div class="card-grid">
+        @foreach (var course in Model)
+        {
+            <article class="course-card">
+                <span class="badge text-bg-success">@course.Subject</span>
+                <h2>@course.Title</h2>
+                <p>@course.Description</p>
+                <div class="card-meta">
+                    <span>@course.GradeLevel</span>
+                    <span>@course.Enrollments.Count enrolled</span>
+                    <span>@course.Teacher?.FullName</span>
+                </div>
+                <div class="card-actions">
+                    <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@course.CourseId">Open</a>
+                    @if (User.IsInRole("Admin") || User.IsInRole("Teacher"))
+                    {
+                        <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@course.CourseId">Edit</a>
+                    }
+                </div>
+            </article>
+        }
+    </div>
+}

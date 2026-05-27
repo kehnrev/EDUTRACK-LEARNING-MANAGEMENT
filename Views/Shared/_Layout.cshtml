@@ -1,0 +1,198 @@
+@using EduTrackAnalytics.Models
+@using Microsoft.EntityFrameworkCore
+@inject EduTrackAnalytics.Data.ApplicationDbContext DbContext
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@{
+    var themeMode = UserSettings.DefaultThemeMode;
+    var layoutStyle = UserSettings.DefaultLayoutStyle;
+    var sidebarState = UserSettings.DefaultSidebarState;
+    var fontSize = UserSettings.DefaultFontSize;
+    var cardStyle = UserSettings.DefaultCardStyle;
+
+    if (User.Identity?.IsAuthenticated ?? false)
+    {
+        try
+        {
+            var userIdValue = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (int.TryParse(userIdValue, out var currentUserId))
+            {
+                var settings = await DbContext.UserSettings.AsNoTracking().FirstOrDefaultAsync(s => s.UserId == currentUserId);
+
+                if (settings != null)
+                {
+                    themeMode = settings.ThemeMode;
+                    layoutStyle = settings.LayoutStyle;
+                    sidebarState = settings.SidebarState;
+                    fontSize = settings.FontSize;
+                    cardStyle = settings.CardStyle;
+                }
+            }
+        }
+        catch
+        {
+            // LocalStorage still applies the last known appearance settings if the database is unavailable.
+        }
+    }
+
+    var antiforgeryTokens = Antiforgery.GetAndStoreTokens(Context);
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0f766e" />
+    <meta name="csrf-token" content="@antiforgeryTokens.RequestToken" />
+    <title>@ViewData["Title"] - EduTrack</title>
+    <script>
+        window.eduTrackServerSettings = {
+            themeMode: "@themeMode",
+            layoutStyle: "@layoutStyle",
+            sidebarState: "@sidebarState",
+            fontSize: "@fontSize",
+            cardStyle: "@cardStyle"
+        };
+
+        (function () {
+            const defaults = {
+                themeMode: "Light",
+                layoutStyle: "Comfortable",
+                sidebarState: "Expanded",
+                fontSize: "Medium",
+                cardStyle: "Default"
+            };
+
+            let saved = {};
+            try {
+                saved = JSON.parse(localStorage.getItem("edutrack.appearance") || "{}");
+            } catch {
+                saved = {};
+            }
+
+            const settings = Object.assign({}, defaults, window.eduTrackServerSettings || {}, saved);
+            const root = document.documentElement;
+            const systemDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+            const effectiveTheme = settings.themeMode === "System" ? (systemDark ? "Dark" : "Light") : settings.themeMode;
+
+            root.dataset.themeMode = String(effectiveTheme || "Light").toLowerCase();
+            root.dataset.themeChoice = String(settings.themeMode || "Light").toLowerCase();
+            root.dataset.layoutStyle = String(settings.layoutStyle || "Comfortable").toLowerCase();
+            root.dataset.sidebarState = String(settings.sidebarState || "Expanded").toLowerCase();
+            root.dataset.fontSize = String(settings.fontSize || "Medium").toLowerCase();
+            root.dataset.cardStyle = String(settings.cardStyle || "Default").toLowerCase();
+        })();
+    </script>
+    <script type="importmap"></script>
+    <link rel="manifest" href="~/manifest.json" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="icon" type="image/svg+xml" href="~/images/icon.svg" />
+</head>
+<body data-authenticated="@((User.Identity?.IsAuthenticated ?? false).ToString().ToLowerInvariant())">
+    <div id="connectionBanner" class="connection-banner online">Online Mode</div>
+    <header class="site-header">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+            <div class="container-fluid">
+                <a class="navbar-brand brand-mark" asp-controller="Home" asp-action="Index">
+                    <span class="brand-icon">ET</span>
+                    EduTrack
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="About">About</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Features">Features</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Contact">Support</a></li>
+                    </ul>
+                    <div class="navbar-actions">
+                        <button type="button" class="btn btn-outline-primary btn-sm theme-toggle" id="themeToggle">Dark Mode</button>
+                        @if (User.Identity?.IsAuthenticated ?? false)
+                        {
+                            var dashboardController = User.IsInRole("Admin") ? "Admin" : User.IsInRole("Teacher") ? "Teacher" : "Student";
+                            <a class="btn btn-outline-primary btn-sm" asp-controller="@dashboardController" asp-action="Index">Dashboard</a>
+                            <span class="user-chip">@User.Identity?.Name</span>
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-primary btn-sm">Logout</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <a class="btn btn-outline-primary btn-sm" asp-controller="Account" asp-action="Login">Login</a>
+                            <a class="btn btn-primary btn-sm" asp-controller="Account" asp-action="Register">Get Started</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    @if (User.Identity?.IsAuthenticated ?? false)
+    {
+        <div class="app-shell">
+            <aside class="sidebar">
+                <div class="sidebar-title">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value Workspace</div>
+                <a asp-controller="@(User.IsInRole("Admin") ? "Admin" : User.IsInRole("Teacher") ? "Teacher" : "Student")" asp-action="Index">Dashboard</a>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-controller="Admin" asp-action="Users">Users</a>
+                    <a asp-controller="Courses" asp-action="Index">Courses</a>
+                    <a asp-controller="Enrollments" asp-action="Index">Enrollments</a>
+                    <a asp-controller="Announcements" asp-action="Index">Announcements</a>
+                    <a asp-controller="Reports" asp-action="ClassPerformance">Reports</a>
+                    <a asp-controller="Settings" asp-action="Appearance">Settings</a>
+                }
+                else if (User.IsInRole("Teacher"))
+                {
+                    <a asp-controller="Courses" asp-action="Index">My Courses</a>
+                    <a asp-controller="Lessons" asp-action="Index">Lessons</a>
+                    <a asp-controller="Assessments" asp-action="Index">Assessments</a>
+                    <a asp-controller="Submissions" asp-action="Index">Submissions</a>
+                    <a asp-controller="Enrollments" asp-action="Index">Enrollments</a>
+                    <a asp-controller="Announcements" asp-action="Index">Announcements</a>
+                    <a asp-controller="Reports" asp-action="ClassPerformance">Reports</a>
+                    <a asp-controller="Settings" asp-action="Appearance">Settings</a>
+                }
+                else
+                {
+                    <a asp-controller="Courses" asp-action="Index">My Courses</a>
+                    <a asp-controller="Lessons" asp-action="Index">Lessons</a>
+                    <a asp-controller="Assessments" asp-action="Index">Assessments</a>
+                    <a asp-controller="Submissions" asp-action="Index">Scores</a>
+                    <a asp-controller="Student" asp-action="OfflineLibrary">Offline Library</a>
+                    <a asp-controller="Announcements" asp-action="Index">Announcements</a>
+                    <a asp-controller="Reports" asp-action="StudentPerformance">Reports</a>
+                    <a asp-controller="Settings" asp-action="Appearance">Settings</a>
+                }
+            </aside>
+            <main role="main" class="app-main">
+                <partial name="_Alerts" />
+                @RenderBody()
+            </main>
+        </div>
+    }
+    else
+    {
+        <main role="main" class="public-main">
+            <partial name="_Alerts" />
+            @RenderBody()
+        </main>
+    }
+
+    <footer class="site-footer">
+        <div class="container">
+            <span>&copy; 2026 EduTrack. Built for SDG 4: Quality Education.</span>
+            <span>Online and offline learning management for schools.</span>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

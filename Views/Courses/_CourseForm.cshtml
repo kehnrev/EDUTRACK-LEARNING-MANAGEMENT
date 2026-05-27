@@ -1,0 +1,34 @@
+@model Course
+
+<div class="row g-3">
+    <div class="col-md-8">
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Subject" class="form-label"></label>
+        <input asp-for="Subject" class="form-control" />
+        <span asp-validation-for="Subject" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="GradeLevel" class="form-label"></label>
+        <input asp-for="GradeLevel" class="form-control" />
+        <span asp-validation-for="GradeLevel" class="text-danger"></span>
+    </div>
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="col-md-8">
+            <label asp-for="TeacherId" class="form-label"></label>
+            <select asp-for="TeacherId" class="form-select" asp-items="ViewBag.Teachers">
+                <option value="">Choose teacher</option>
+            </select>
+            <span asp-validation-for="TeacherId" class="text-danger"></span>
+        </div>
+    }
+    <div class="col-12">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+</div>

@@ -1,0 +1,43 @@
+@model AssessmentTakeViewModel
+@{
+    ViewData["Title"] = "Take Assessment";
+}
+
+<div class="dashboard-heading">
+    <div>
+        <span class="eyebrow">Assessment</span>
+        <h1>@Model.Title</h1>
+        <p>@Model.Instructions</p>
+    </div>
+    <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@Model.AssessmentId">Back</a>
+</div>
+
+<section class="panel">
+    <div class="assessment-meta">
+        <span>Total points: @Model.TotalPoints</span>
+        <span>Due: @Model.DueDate.ToString("MMM dd, yyyy")</span>
+        <span>@(Model.IsAvailableOffline ? "Offline enabled" : "Online only")</span>
+    </div>
+    <form asp-action="Take" method="post" id="assessmentForm" data-assessment-id="@Model.AssessmentId" data-offline-enabled="@Model.IsAvailableOffline.ToString().ToLowerInvariant()" novalidate>
+        <input asp-for="AssessmentId" type="hidden" />
+        @for (var i = 0; i < Model.Questions.Count; i++)
+        {
+            <div class="question-block">
+                <input asp-for="Questions[i].QuestionId" type="hidden" />
+                <h2>@(i + 1). @Model.Questions[i].QuestionText</h2>
+                <div class="answer-options">
+                    <label><input asp-for="Questions[i].SelectedAnswer" type="radio" value="A" /> A. @Model.Questions[i].OptionA</label>
+                    <label><input asp-for="Questions[i].SelectedAnswer" type="radio" value="B" /> B. @Model.Questions[i].OptionB</label>
+                    <label><input asp-for="Questions[i].SelectedAnswer" type="radio" value="C" /> C. @Model.Questions[i].OptionC</label>
+                    <label><input asp-for="Questions[i].SelectedAnswer" type="radio" value="D" /> D. @Model.Questions[i].OptionD</label>
+                </div>
+                <span asp-validation-for="Questions[i].SelectedAnswer" class="text-danger"></span>
+            </div>
+        }
+        <button class="btn btn-primary" type="submit">Submit Answers</button>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

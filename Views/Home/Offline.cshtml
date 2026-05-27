@@ -1,0 +1,22 @@
+@{
+    ViewData["Title"] = "Offline";
+}
+
+<section class="page-hero compact offline-page">
+    <div class="container">
+        <span class="eyebrow">Offline Mode</span>
+        <h1>You are currently offline.</h1>
+        <p>You can still access saved lessons and pending assessments. Your answers will sync when internet returns.</p>
+        <a class="btn btn-primary" asp-controller="Student" asp-action="Index">Open Dashboard</a>
+    </div>
+</section>
+
+<section class="section-pad">
+    <div class="container">
+        <div class="empty-state">
+            <h2>Saved learning content</h2>
+            <p id="offlineLessonsMessage">Saved lessons will appear on this device after you mark lessons for offline access.</p>
+            <div id="offlineLessonsList" class="offline-list"></div>
+        </div>
+    </div>
+</section>
