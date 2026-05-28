@@ -2,29 +2,35 @@
 
 <div class="row g-3">
     <div class="col-md-6">
-        <label asp-for="CourseId" class="form-label"></label>
+        <label asp-for="CourseId" class="form-label">Course <span class="text-danger">*</span></label>
         <select asp-for="CourseId" class="form-select" asp-items="ViewBag.Courses">
             <option value="">Choose course</option>
         </select>
+        <div class="form-text">Students enrolled in this course will see the assessment.</div>
         <span asp-validation-for="CourseId" class="text-danger"></span>
     </div>
     <div class="col-md-6">
-        <label asp-for="Title" class="form-label"></label>
+        <label asp-for="Title" class="form-label">Assessment Title <span class="text-danger">*</span></label>
         <input asp-for="Title" class="form-control" />
+        <div class="form-text">Use a specific title such as "General Mathematics Application Quiz".</div>
         <span asp-validation-for="Title" class="text-danger"></span>
     </div>
     <div class="col-12">
-        <label asp-for="Instructions" class="form-label"></label>
+        <label asp-for="Instructions" class="form-label">Instructions <span class="text-danger">*</span></label>
         <textarea asp-for="Instructions" class="form-control" rows="4"></textarea>
+        @if (ViewBag.DefaultPassingScore != null)
+        {
+            <div class="form-text">Teacher default: passing score @ViewBag.DefaultPassingScore%, duration @ViewBag.DefaultAssessmentDuration minutes.</div>
+        }
         <span asp-validation-for="Instructions" class="text-danger"></span>
     </div>
     <div class="col-md-4">
-        <label asp-for="DueDate" class="form-label"></label>
+        <label asp-for="DueDate" class="form-label">Due Date <span class="text-danger">*</span></label>
         <input asp-for="DueDate" class="form-control" type="date" />
         <span asp-validation-for="DueDate" class="text-danger"></span>
     </div>
     <div class="col-md-4">
-        <label asp-for="TotalPoints" class="form-label"></label>
+        <label asp-for="TotalPoints" class="form-label">Total Points <span class="text-danger">*</span></label>
         <input asp-for="TotalPoints" class="form-control" />
         <span asp-validation-for="TotalPoints" class="text-danger"></span>
     </div>

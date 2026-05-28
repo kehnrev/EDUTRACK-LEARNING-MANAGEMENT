@@ -69,6 +69,19 @@ public class AdminController : Controller
                     .OrderByDescending(a => a.CreatedAt)
                     .Take(5)
                     .ToListAsync(),
+                RecentUsers = await _context.Users
+                    .AsNoTracking()
+                    .OrderByDescending(u => u.DateCreated)
+                    .Take(5)
+                    .ToListAsync(),
+                RecentSubmissions = await _context.Submissions
+                    .AsNoTracking()
+                    .Include(s => s.Student)
+                    .Include(s => s.Assessment)
+                    .ThenInclude(a => a!.Course)
+                    .OrderByDescending(s => s.SubmittedAt)
+                    .Take(5)
+                    .ToListAsync(),
                 CourseEnrollmentSummary = enrollmentSummary,
                 PassFailDistribution = new Dictionary<string, int>
                 {
@@ -96,6 +109,8 @@ public class AdminController : Controller
         return new AdminDashboardViewModel
         {
             RecentAnnouncements = new List<Announcement>(),
+            RecentUsers = new List<ApplicationUser>(),
+            RecentSubmissions = new List<Submission>(),
             CourseEnrollmentSummary = new Dictionary<string, int>(),
             PassFailDistribution = new Dictionary<string, int>
             {

@@ -240,27 +240,86 @@
     });
   }
 
-  function updateConnectionBanner() {
+  let connectionBannerTimer;
+
+  function pendingSubmissionCount() {
+    return readJson(pendingKey, []).length;
+  }
+
+  function hideConnectionBanner() {
     const banner = document.getElementById("connectionBanner");
     if (!banner) return;
 
+    banner.hidden = true;
+    banner.classList.remove("is-visible", "online", "offline", "back-online");
+  }
+
+  function showConnectionBanner(message, mode, autoHide) {
+    const banner = document.getElementById("connectionBanner");
+    if (!banner) return;
+
+    clearTimeout(connectionBannerTimer);
+    banner.textContent = message;
+    banner.hidden = false;
+    banner.classList.remove("online", "offline", "back-online");
+    banner.classList.add("is-visible", mode);
+
+    if (autoHide) {
+      connectionBannerTimer = setTimeout(hideConnectionBanner, 2800);
+    }
+  }
+
+  function canShowConnectionBanner() {
     const settings = getAppearanceSettings();
     if (!settings.showOfflineBanner || !settings.enableOfflineMode) {
-      banner.hidden = true;
+      hideConnectionBanner();
+      return false;
+    }
+
+    return true;
+  }
+
+  function updateConnectionBannerOnLoad() {
+    if (!canShowConnectionBanner()) {
       return;
     }
 
-    banner.hidden = false;
-
-    if (navigator.onLine) {
-      banner.textContent = "Online Mode";
-      banner.classList.add("online");
-      banner.classList.remove("offline");
-    } else {
-      banner.textContent = "Offline Mode";
-      banner.classList.add("offline");
-      banner.classList.remove("online");
+    if (!navigator.onLine) {
+      showConnectionBanner("Offline Mode — Some features may be limited.", "offline", false);
+      return;
     }
+
+    if (sessionStorage.getItem("edutrackOnlineBannerShown") === "true") {
+      hideConnectionBanner();
+      return;
+    }
+
+    sessionStorage.setItem("edutrackOnlineBannerShown", "true");
+    showConnectionBanner("Online Mode — You are online.", "online", true);
+  }
+
+  function updateConnectionBannerOffline() {
+    if (!canShowConnectionBanner()) return;
+    showConnectionBanner("Offline Mode — Some features may be limited.", "offline", false);
+  }
+
+  async function updateConnectionBannerOnline() {
+    if (!canShowConnectionBanner()) return;
+
+    const pendingCount = pendingSubmissionCount();
+    if (pendingCount > 0) {
+      showConnectionBanner("Back Online — Syncing pending data...", "back-online", false);
+      const remaining = await syncPendingSubmissions({ silent: true });
+      showConnectionBanner(
+        remaining === 0
+          ? "Back Online — Data synced successfully."
+          : "Back Online — Some items still need sync.",
+        remaining === 0 ? "online" : "offline",
+        true);
+      return;
+    }
+
+    showConnectionBanner("Back Online", "back-online", true);
   }
 
   async function registerServiceWorker() {
@@ -439,15 +498,15 @@
     });
   }
 
-  async function syncPendingSubmissions() {
-    if (!navigator.onLine) return;
+  async function syncPendingSubmissions(options) {
+    if (!navigator.onLine) return pendingSubmissionCount();
     const settings = getAppearanceSettings();
-    if (!settings.enableOfflineMode || !settings.autoSyncWhenOnline) return;
+    if (!settings.enableOfflineMode || !settings.autoSyncWhenOnline) return pendingSubmissionCount();
 
     const pending = readJson(pendingKey, []);
-    if (!pending.length) return;
+    if (!pending.length) return 0;
 
-    if (settings.enableOfflineSyncNotifications !== false) {
+    if (!options?.silent && settings.enableOfflineSyncNotifications !== false) {
       showToast("You are back online. Syncing your data...");
     }
     const remaining = [];
@@ -480,9 +539,11 @@
 
     writeJson(pendingKey, remaining);
 
-    if (remaining.length === 0 && settings.showSyncSuccessMessage) {
+    if (!options?.silent && remaining.length === 0 && settings.showSyncSuccessMessage) {
       showToast("Offline submissions synced successfully.");
     }
+
+    return remaining.length;
   }
 
   function splitData(value) {
@@ -795,18 +856,14 @@
     });
   }
 
-  window.addEventListener("online", () => {
-    updateConnectionBanner();
-    syncPendingSubmissions();
-  });
-
-  window.addEventListener("offline", updateConnectionBanner);
+  window.addEventListener("online", updateConnectionBannerOnline);
+  window.addEventListener("offline", updateConnectionBannerOffline);
   window.addEventListener("resize", drawCharts);
 
   document.addEventListener("DOMContentLoaded", () => {
     setupAppearanceSettings();
     setupOfflineCheckboxFeedback();
-    updateConnectionBanner();
+    updateConnectionBannerOnLoad();
     registerServiceWorker();
     setupOfflineLessonSave();
     setupOfflineAssessmentForm();

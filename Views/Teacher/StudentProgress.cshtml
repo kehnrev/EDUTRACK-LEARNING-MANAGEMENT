@@ -74,11 +74,17 @@
                         <th>Progress</th>
                         <th>Missing</th>
                         <th>Suggested action</th>
+                        <th>Support note</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var student in Model.SupportRows)
                     {
+                        var supportNote = student.MissingAssessments > 0
+                            ? "Needs follow-up on missing quizzes."
+                            : student.AverageScore < 60
+                                ? $"Recommend reviewing {student.CourseTitle} learning materials."
+                                : "Continue monitoring and provide encouragement.";
                         <tr>
                             <td>
                                 <strong>@student.StudentName</strong>
@@ -89,6 +95,7 @@
                             <td>@student.ProgressPercentage.ToString("0.##")%</td>
                             <td>@student.MissingAssessments</td>
                             <td>@student.SuggestedAction</td>
+                            <td>@supportNote</td>
                         </tr>
                     }
                 </tbody>

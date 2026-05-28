@@ -6,6 +6,8 @@
     var courseAverageValues = string.Join(",", Model.ClassAverageByCourse.Values);
     var submissionLabels = string.Join(",", Model.SubmissionStatusSummary.Keys);
     var submissionValues = string.Join(",", Model.SubmissionStatusSummary.Values);
+    var nextAssessment = Model.UpcomingAssessments.FirstOrDefault();
+    var supportStudent = Model.StudentsNeedingImprovement.FirstOrDefault();
 }
 
 <div class="dashboard-heading">
@@ -27,20 +29,108 @@
     <a class="btn btn-outline-primary" asp-controller="Announcements" asp-action="Create">Post Announcement</a>
 </div>
 
+<section class="panel mb-4">
+    <h2>Next Best Action</h2>
+    <div class="next-actions">
+        @if (Model.PendingSubmissions > 0)
+        {
+            <div class="action-card">
+                <div>
+                    <strong>Next: Review @Model.PendingSubmissions pending submissions</strong>
+                    <p>Check missing or recently submitted assessments so students receive timely feedback.</p>
+                </div>
+                <a class="btn btn-primary btn-sm" asp-controller="Submissions" asp-action="Index">View Submissions</a>
+            </div>
+        }
+        @if (supportStudent != null)
+        {
+            <div class="action-card">
+                <div>
+                    <strong>Follow up with @supportStudent.FullName</strong>
+                    <p>Student appears in the support list because of low scores, missing work, or low progress.</p>
+                </div>
+                <a class="btn btn-outline-primary btn-sm" asp-controller="Teacher" asp-action="StudentProgress">View Progress</a>
+            </div>
+        }
+        @if (nextAssessment != null)
+        {
+            <div class="action-card">
+                <div>
+                    <strong>Upcoming: @nextAssessment.Title</strong>
+                    <p>@nextAssessment.Course?.Title - Due @nextAssessment.DueDate.ToString("MMM dd, yyyy")</p>
+                </div>
+                <a class="btn btn-outline-primary btn-sm" asp-controller="Assessments" asp-action="Details" asp-route-id="@nextAssessment.AssessmentId">Open</a>
+            </div>
+        }
+        @if (Model.CoursesMissingLearningMaterials > 0)
+        {
+            <div class="action-card">
+                <div>
+                    <strong>Add learning materials</strong>
+                    <p>@Model.CoursesMissingLearningMaterials course(s) still need a lecture or lesson.</p>
+                </div>
+                <a class="btn btn-outline-primary btn-sm" asp-controller="Lessons" asp-action="Create">Add Lecture</a>
+            </div>
+        }
+        @if (Model.PendingSubmissions == 0 && supportStudent == null && nextAssessment == null && Model.CoursesMissingLearningMaterials == 0)
+        {
+            <div class="action-card">
+                <div>
+                    <strong>Keep classes moving</strong>
+                    <p>Create a new lecture or assessment when the next topic is ready.</p>
+                </div>
+                <a class="btn btn-outline-primary btn-sm" asp-controller="Lessons" asp-action="Create">Add Lecture</a>
+            </div>
+        }
+    </div>
+</section>
+
 <div class="stats-grid" data-dashboard-section="Pending Submissions">
-    <div class="stat-card"><span>My courses</span><strong>@Model.MyCourses</strong></div>
-    <div class="stat-card"><span>Students enrolled</span><strong>@Model.TotalStudentsEnrolled</strong></div>
-    <div class="stat-card"><span>Total lessons</span><strong>@Model.TotalLessonsCreated</strong></div>
-    <div class="stat-card"><span>Total assessments</span><strong>@Model.TotalAssessmentsCreated</strong></div>
-    <div class="stat-card"><span>Pending submissions</span><strong>@Model.PendingSubmissions</strong></div>
-    <div class="stat-card"><span>Average class score</span><strong>@Model.AverageClassScore.ToString("0.##")%</strong></div>
-    <div class="stat-card"><span>Class status</span><strong><span class="badge @PerformanceLabelHelper.GetBadgeClass(Model.AverageClassScore)">@PerformanceLabelHelper.GetLabel(Model.AverageClassScore)</span></strong></div>
+    <a class="stat-card stat-link" asp-controller="Courses" asp-action="Index"><span>My courses</span><strong>@Model.MyCourses</strong></a>
+    <a class="stat-card stat-link" asp-controller="Teacher" asp-action="ClassList"><span>Students enrolled</span><strong>@Model.TotalStudentsEnrolled</strong></a>
+    <a class="stat-card stat-link" asp-controller="Lessons" asp-action="Index"><span>Total lessons</span><strong>@Model.TotalLessonsCreated</strong></a>
+    <a class="stat-card stat-link" asp-controller="Assessments" asp-action="Index"><span>Total assessments</span><strong>@Model.TotalAssessmentsCreated</strong></a>
+    <a class="stat-card stat-link" asp-controller="Submissions" asp-action="Index"><span>Pending submissions</span><strong>@Model.PendingSubmissions</strong></a>
+    <a class="stat-card stat-link" asp-controller="Reports" asp-action="ClassPerformance"><span>Average class score</span><strong>@Model.AverageClassScore.ToString("0.##")%</strong></a>
+    <a class="stat-card stat-link" asp-controller="Teacher" asp-action="StudentProgress"><span>Class status</span><strong><span class="badge @PerformanceLabelHelper.GetBadgeClass(Model.AverageClassScore)">@PerformanceLabelHelper.GetLabel(Model.AverageClassScore)</span></strong></a>
 </div>
 
+<div class="quick-action-heading">Notification Center</div>
 <section class="notification-strip" aria-label="Teacher notifications">
     <div><strong>Announcement posted</strong><span>Recent announcements are visible to enrolled learners.</span></div>
     <div><strong>New lesson available</strong><span>Offline-ready materials help students continue learning without internet.</span></div>
     <div><strong>New assessment posted</strong><span>Upcoming quizzes are listed in student dashboards.</span></div>
+    <div><strong>File uploaded successfully</strong><span>Uploaded materials appear on student lesson pages.</span></div>
+</section>
+
+<section class="panel mb-4">
+    <h2>Recent Activity</h2>
+    <div class="activity-timeline">
+        @if (Model.RecentSubmissions.Any())
+        {
+            @foreach (var item in Model.RecentSubmissions.Take(4))
+            {
+                <div class="timeline-item">
+                    <strong>@item.Student?.FullName submitted @item.Assessment?.Title</strong>
+                    <p>@item.Score.ToString("0.##")% - @item.SubmittedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</p>
+                </div>
+            }
+        }
+        @if (Model.RecentAssessments.Any())
+        {
+            @foreach (var item in Model.RecentAssessments.Take(2))
+            {
+                <div class="timeline-item">
+                    <strong>Assessment created: @item.Title</strong>
+                    <p>@item.Course?.Title - Due @item.DueDate.ToString("MMM dd, yyyy")</p>
+                </div>
+            }
+        }
+        @if (!Model.RecentSubmissions.Any() && !Model.RecentAssessments.Any())
+        {
+            <p class="empty-copy">Class activity will appear here after assessments, submissions, and lessons are added.</p>
+        }
+    </div>
 </section>
 
 <div class="dashboard-grid">

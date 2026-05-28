@@ -11,6 +11,8 @@ public class AdminDashboardViewModel
     public decimal OverallAveragePerformance { get; set; }
     public int PendingSyncSubmissions { get; set; }
     public List<Announcement> RecentAnnouncements { get; set; } = new();
+    public List<ApplicationUser> RecentUsers { get; set; } = new();
+    public List<Submission> RecentSubmissions { get; set; } = new();
     public Dictionary<string, int> CourseEnrollmentSummary { get; set; } = new();
     public Dictionary<string, int> PassFailDistribution { get; set; } = new();
 }
@@ -29,6 +31,7 @@ public class TeacherDashboardViewModel
     public List<Assessment> UpcomingAssessments { get; set; } = new();
     public Dictionary<string, decimal> ClassAverageByCourse { get; set; } = new();
     public Dictionary<string, int> SubmissionStatusSummary { get; set; } = new();
+    public int CoursesMissingLearningMaterials { get; set; }
 }
 
 public class TeacherClassListViewModel

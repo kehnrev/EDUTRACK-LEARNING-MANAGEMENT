@@ -78,7 +78,7 @@ else
                         {
                             <td><span class="badge @assessmentStatusClass">@assessmentStatus</span></td>
                         }
-                        <td><span class="badge @(item.IsAvailableOffline ? "text-bg-success" : "text-bg-secondary")">@(item.IsAvailableOffline ? "Available Offline" : "Online Only")</span></td>
+                        <td><span class="badge @(item.IsAvailableOffline ? "text-bg-success" : "text-bg-secondary")">@(item.IsAvailableOffline ? "Available Offline" : "Needs Internet")</span></td>
                         <td class="text-end">
                             <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@item.AssessmentId">Open</a>
                             @if (User.IsInRole("Student"))

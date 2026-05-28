@@ -46,19 +46,19 @@ public static class PerformanceLabelHelper
     {
         if (percentage >= 85)
         {
-            return "Keep up the strong work and continue practicing with the next activity.";
+            return "Excellent work. Continue to the next lesson.";
         }
 
         if (percentage >= 75)
         {
-            return "Good progress. Review the missed questions before the next quiz.";
+            return "Good work. Review minor mistakes.";
         }
 
         if (percentage >= 60)
         {
-            return "Review the related lesson and ask your teacher for a short follow-up activity.";
+            return "Needs improvement. Review the related lesson before the next quiz.";
         }
 
-        return "Please revisit the lesson materials and ask your teacher for academic support.";
+        return "At Risk. Ask your teacher for support and review the learning material.";
     }
 }

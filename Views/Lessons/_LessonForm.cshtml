@@ -2,20 +2,23 @@
 
 <div class="row g-3">
     <div class="col-md-6">
-        <label asp-for="CourseId" class="form-label">Select Course</label>
+        <label asp-for="CourseId" class="form-label">Select Course <span class="text-danger">*</span></label>
         <select asp-for="CourseId" class="form-select" asp-items="ViewBag.Courses">
             <option value="">Choose course</option>
         </select>
+        <div class="form-text">Choose the Senior High School class that should receive this lecture.</div>
         <span asp-validation-for="CourseId" class="text-danger"></span>
     </div>
     <div class="col-md-6">
-        <label asp-for="Title" class="form-label">Lecture Title</label>
+        <label asp-for="Title" class="form-label">Lecture Title <span class="text-danger">*</span></label>
         <input asp-for="Title" class="form-control" />
+        <div class="form-text">Use a clear title students can recognize on their Lessons page.</div>
         <span asp-validation-for="Title" class="text-danger"></span>
     </div>
     <div class="col-12">
-        <label asp-for="Content" class="form-label">Lecture Content</label>
+        <label asp-for="Content" class="form-label">Lecture Content <span class="text-danger">*</span></label>
         <textarea asp-for="Content" class="form-control" rows="8"></textarea>
+        <div class="form-text">Add the main explanation, reading guide, or activity instructions for students.</div>
         <span asp-validation-for="Content" class="text-danger"></span>
     </div>
     <div class="col-md-8">

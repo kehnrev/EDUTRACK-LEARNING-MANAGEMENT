@@ -60,12 +60,15 @@
     var antiforgeryTokens = Antiforgery.GetAndStoreTokens(Context);
     var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
     var routeController = ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty;
+    var routeAction = ViewContext.RouteData.Values["action"]?.ToString() ?? string.Empty;
     var isPublicPage = string.Equals(routeController, "Home", StringComparison.OrdinalIgnoreCase)
         || string.Equals(routeController, "Account", StringComparison.OrdinalIgnoreCase);
     var showWorkspaceShell = isAuthenticated && !isPublicPage;
     var dashboardController = User.IsInRole("Admin") ? "Admin" : User.IsInRole("Teacher") ? "Teacher" : "Student";
     var brandController = isAuthenticated ? dashboardController : "Home";
     var brandAction = isAuthenticated ? "Index" : "Index";
+    var isDashboardHome = string.Equals(routeController, dashboardController, StringComparison.OrdinalIgnoreCase)
+        && string.Equals(routeAction, "Index", StringComparison.OrdinalIgnoreCase);
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -145,7 +148,7 @@
     <link rel="icon" type="image/svg+xml" href="~/images/icon.svg" />
 </head>
 <body data-authenticated="@isAuthenticated.ToString().ToLowerInvariant()" data-role="@(User.IsInRole("Admin") ? "Admin" : User.IsInRole("Teacher") ? "Teacher" : User.IsInRole("Student") ? "Student" : "Public")">
-    <div id="connectionBanner" class="connection-banner online">Online Mode</div>
+    <div id="connectionBanner" class="connection-banner online" role="status" aria-live="polite" hidden>Online Mode</div>
     <header class="site-header">
         <nav class="navbar navbar-expand-lg navbar-light border-bottom">
             <div class="container-fluid">
@@ -225,6 +228,14 @@
                 }
             </aside>
             <main role="main" class="app-main">
+                <nav class="breadcrumb-trail" aria-label="Breadcrumb">
+                    <a asp-controller="@dashboardController" asp-action="Index">Dashboard</a>
+                    @if (!isDashboardHome)
+                    {
+                        <span aria-hidden="true">/</span>
+                        <span>@(ViewData["Title"] ?? routeController)</span>
+                    }
+                </nav>
                 <partial name="_Alerts" />
                 @RenderBody()
             </main>

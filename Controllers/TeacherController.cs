@@ -57,6 +57,8 @@ public class TeacherController : Controller
                 .CountAsync(),
             TotalLessonsCreated = await _context.Lessons.CountAsync(l => courseIds.Contains(l.CourseId)),
             TotalAssessmentsCreated = await _context.Assessments.CountAsync(a => courseIds.Contains(a.CourseId)),
+            CoursesMissingLearningMaterials = await _context.Courses
+                .CountAsync(c => c.TeacherId == teacherId && !c.Lessons.Any()),
             PendingSubmissions = Math.Max(0, expectedSubmissions - actualSubmissions),
             AverageClassScore = await _analytics.GetTeacherAverageAsync(teacherId),
             StudentsNeedingImprovement = await _analytics.GetStudentsNeedingImprovementAsync(teacherId),

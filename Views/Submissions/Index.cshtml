@@ -25,7 +25,7 @@ else
 {
     <div class="table-responsive panel">
         <table class="table align-middle">
-            <thead><tr><th>Student</th><th>Course</th><th>Assessment</th><th>Score</th><th>Total points</th><th>Percentage</th><th>Performance</th><th>Status</th><th>Submitted</th><th></th></tr></thead>
+            <thead><tr><th>Student</th><th>Course</th><th>Assessment</th><th>Score</th><th>Total points</th><th>Percentage</th><th>Performance</th><th>Recommendation</th><th>Status</th><th>Submitted</th><th></th></tr></thead>
             <tbody>
                 @foreach (var item in Model)
                 {
@@ -41,6 +41,7 @@ else
                         <td>@totalPoints</td>
                         <td>@item.Score.ToString("0.##")%</td>
                         <td><span class="badge @PerformanceLabelHelper.GetBadgeClass(item.Score)">@PerformanceLabelHelper.GetLabel(item.Score)</span></td>
+                        <td>@PerformanceLabelHelper.GetRecommendation(item.Score)</td>
                         <td><span class="badge @badgeClass">@item.Status</span></td>
                         <td>@item.SubmittedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</td>
                         <td class="text-end"><a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@item.SubmissionId">Open</a></td>
