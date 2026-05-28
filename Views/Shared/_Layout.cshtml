@@ -228,14 +228,14 @@
                 }
             </aside>
             <main role="main" class="app-main">
-                <nav class="breadcrumb-trail" aria-label="Breadcrumb">
-                    <a asp-controller="@dashboardController" asp-action="Index">Dashboard</a>
-                    @if (!isDashboardHome)
-                    {
+                @if (!isDashboardHome)
+                {
+                    <nav class="breadcrumb-trail" aria-label="Breadcrumb">
+                        <a asp-controller="@dashboardController" asp-action="Index">Dashboard</a>
                         <span aria-hidden="true">/</span>
                         <span>@(ViewData["Title"] ?? routeController)</span>
-                    }
-                </nav>
+                    </nav>
+                }
                 <partial name="_Alerts" />
                 @RenderBody()
             </main>
