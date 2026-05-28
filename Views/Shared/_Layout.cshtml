@@ -5,7 +5,6 @@
 @{
     var themeMode = UserSettings.DefaultThemeMode;
     var layoutStyle = UserSettings.DefaultLayoutStyle;
-    var sidebarState = UserSettings.DefaultSidebarState;
     var fontSize = UserSettings.DefaultFontSize;
     var cardStyle = UserSettings.DefaultCardStyle;
     var highContrastMode = false;
@@ -35,7 +34,6 @@
                 {
                     themeMode = settings.ThemeMode;
                     layoutStyle = settings.LayoutStyle;
-                    sidebarState = settings.SidebarState;
                     fontSize = settings.FontSize;
                     cardStyle = settings.CardStyle;
                     highContrastMode = settings.HighContrastMode;
@@ -60,6 +58,14 @@
     }
 
     var antiforgeryTokens = Antiforgery.GetAndStoreTokens(Context);
+    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+    var routeController = ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty;
+    var isPublicPage = string.Equals(routeController, "Home", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(routeController, "Account", StringComparison.OrdinalIgnoreCase);
+    var showWorkspaceShell = isAuthenticated && !isPublicPage;
+    var dashboardController = User.IsInRole("Admin") ? "Admin" : User.IsInRole("Teacher") ? "Teacher" : "Student";
+    var brandController = isAuthenticated ? dashboardController : "Home";
+    var brandAction = isAuthenticated ? "Index" : "Index";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -73,7 +79,6 @@
         window.eduTrackServerSettings = {
             themeMode: "@themeMode",
             layoutStyle: "@layoutStyle",
-            sidebarState: "@sidebarState",
             fontSize: "@fontSize",
             cardStyle: "@cardStyle",
             highContrastMode: @highContrastMode.ToString().ToLowerInvariant(),
@@ -94,7 +99,6 @@
             const defaults = {
                 themeMode: "Light",
                 layoutStyle: "Comfortable",
-                sidebarState: "Expanded",
                 fontSize: "Medium",
                 cardStyle: "Default",
                 highContrastMode: false,
@@ -126,7 +130,6 @@
             root.dataset.themeMode = String(effectiveTheme || "Light").toLowerCase();
             root.dataset.themeChoice = String(settings.themeMode || "Light").toLowerCase();
             root.dataset.layoutStyle = String(settings.layoutStyle || "Comfortable").toLowerCase();
-            root.dataset.sidebarState = String(settings.sidebarState || "Expanded").toLowerCase();
             root.dataset.fontSize = String(settings.fontSize || "Medium").toLowerCase();
             root.dataset.cardStyle = String(settings.cardStyle || "Default").toLowerCase();
             root.dataset.highContrast = settings.highContrastMode === true ? "true" : "false";
@@ -141,12 +144,12 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="icon" type="image/svg+xml" href="~/images/icon.svg" />
 </head>
-<body data-authenticated="@((User.Identity?.IsAuthenticated ?? false).ToString().ToLowerInvariant())" data-role="@(User.IsInRole("Admin") ? "Admin" : User.IsInRole("Teacher") ? "Teacher" : User.IsInRole("Student") ? "Student" : "Public")">
+<body data-authenticated="@isAuthenticated.ToString().ToLowerInvariant()" data-role="@(User.IsInRole("Admin") ? "Admin" : User.IsInRole("Teacher") ? "Teacher" : User.IsInRole("Student") ? "Student" : "Public")">
     <div id="connectionBanner" class="connection-banner online">Online Mode</div>
     <header class="site-header">
         <nav class="navbar navbar-expand-lg navbar-light border-bottom">
             <div class="container-fluid">
-                <a class="navbar-brand brand-mark" asp-controller="Home" asp-action="Index">
+                <a class="navbar-brand brand-mark" asp-controller="@brandController" asp-action="@brandAction">
                     <span class="brand-icon">ET</span>
                     EduTrack
                 </a>
@@ -163,9 +166,8 @@
                     </ul>
                     <div class="navbar-actions">
                         <button type="button" class="btn btn-outline-primary btn-sm theme-toggle" id="themeToggle">Dark Mode</button>
-                        @if (User.Identity?.IsAuthenticated ?? false)
+                        @if (isAuthenticated)
                         {
-                            var dashboardController = User.IsInRole("Admin") ? "Admin" : User.IsInRole("Teacher") ? "Teacher" : "Student";
                             <a class="btn btn-outline-primary btn-sm" asp-controller="@dashboardController" asp-action="Index">Dashboard</a>
                             <span class="user-chip">@User.Identity?.Name</span>
                             <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
@@ -183,7 +185,7 @@
         </nav>
     </header>
 
-    @if (User.Identity?.IsAuthenticated ?? false)
+    @if (showWorkspaceShell)
     {
         <div class="app-shell">
             <aside class="sidebar">
@@ -222,7 +224,6 @@
                 }
             </aside>
             <main role="main" class="app-main">
-                <button type="button" class="btn btn-outline-primary sidebar-toggle no-print" id="sidebarToggle" aria-label="Toggle dashboard menu">Hide Menu</button>
                 <partial name="_Alerts" />
                 @RenderBody()
             </main>

@@ -27,7 +27,6 @@
     return {
       themeMode: "Light",
       layoutStyle: "Comfortable",
-      sidebarState: "Expanded",
       fontSize: "Medium",
       cardStyle: "Default",
       highContrastMode: false,
@@ -61,7 +60,6 @@
     const valid = {
       themeMode: ["Light", "Dark", "System"],
       layoutStyle: ["Comfortable", "Compact"],
-      sidebarState: ["Expanded", "Collapsed", "Hidden"],
       fontSize: ["Small", "Medium", "Large"],
       cardStyle: ["Default", "Minimal"],
       studentDashboardPriority: ["Upcoming Assessments", "Recent Scores", "Course Progress", "Offline Lessons", "Announcements"],
@@ -89,6 +87,7 @@
       next[key] = toBoolean(next[key], defaults[key]);
     });
 
+    delete next.sidebarState;
     return next;
   }
 
@@ -107,7 +106,6 @@
     root.dataset.themeMode = effectiveTheme.toLowerCase();
     root.dataset.themeChoice = normalized.themeMode.toLowerCase();
     root.dataset.layoutStyle = normalized.layoutStyle.toLowerCase();
-    root.dataset.sidebarState = normalized.sidebarState.toLowerCase();
     root.dataset.fontSize = normalized.fontSize.toLowerCase();
     root.dataset.cardStyle = normalized.cardStyle.toLowerCase();
     root.dataset.highContrast = normalized.highContrastMode ? "true" : "false";
@@ -127,7 +125,6 @@
 
     requestAnimationFrame(drawCharts);
     requestAnimationFrame(() => applyDashboardPreference(normalized));
-    updateSidebarToggle(normalized);
   }
 
   function getSettingsFromForm(form) {
@@ -137,7 +134,6 @@
     return normalizeAppearance({
       themeMode: data.get("ThemeMode"),
       layoutStyle: data.get("LayoutStyle"),
-      sidebarState: data.get("SidebarState"),
       fontSize: data.get("FontSize"),
       cardStyle: data.get("CardStyle"),
       highContrastMode: readChecked("HighContrastMode"),
@@ -221,50 +217,6 @@
         }
       } catch {
         showToast("Theme changed on this device. It will sync when settings can be saved.");
-      }
-    });
-  }
-
-  function updateSidebarToggle(settings) {
-    const toggle = document.getElementById("sidebarToggle");
-    if (!toggle) return;
-
-    const isHidden = settings.sidebarState === "Hidden";
-    toggle.textContent = isHidden ? "Show Menu" : "Hide Menu";
-    toggle.setAttribute("aria-expanded", String(!isHidden));
-  }
-
-  function setupSidebarToggle() {
-    const toggle = document.getElementById("sidebarToggle");
-    if (!toggle) return;
-
-    const saved = readJson(appearanceKey, {});
-    if (!saved.sidebarState && window.innerWidth <= 900) {
-      const settings = getAppearanceSettings();
-      settings.sidebarState = "Hidden";
-      applyAppearance(settings);
-    }
-
-    toggle.addEventListener("click", async () => {
-      const settings = getAppearanceSettings();
-      settings.sidebarState = settings.sidebarState === "Hidden" ? "Expanded" : "Hidden";
-      applyAppearance(settings);
-
-      const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content");
-      if (document.body.dataset.authenticated !== "true" || !token) return;
-
-      try {
-        await fetch("/Settings/QuickSidebar", {
-          method: "POST",
-          credentials: "same-origin",
-          headers: {
-            "Content-Type": "application/json",
-            "RequestVerificationToken": token
-          },
-          body: JSON.stringify({ sidebarState: settings.sidebarState })
-        });
-      } catch {
-        showToast("Menu preference saved on this device.");
       }
     });
   }
@@ -853,7 +805,6 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     setupAppearanceSettings();
-    setupSidebarToggle();
     setupOfflineCheckboxFeedback();
     updateConnectionBanner();
     registerServiceWorker();

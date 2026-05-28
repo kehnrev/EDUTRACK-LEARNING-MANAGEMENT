@@ -184,21 +184,6 @@ a:hover {
   padding: 2rem;
 }
 
-.sidebar-toggle {
-  margin-bottom: 1rem;
-  position: sticky;
-  top: 0.75rem;
-  z-index: 10;
-}
-
-html[data-sidebar-state="hidden"] .app-shell {
-  grid-template-columns: 0 minmax(0, 1fr);
-}
-
-html[data-sidebar-state="hidden"] .sidebar {
-  display: none;
-}
-
 html[data-reduce-animations="true"] .app-shell,
 html[data-low-data-mode="true"] .app-shell {
   transition: none;
@@ -973,29 +958,6 @@ html[data-layout-style="compact"] .card-grid {
   gap: 0.75rem;
 }
 
-html[data-sidebar-state="collapsed"] .app-shell {
-  grid-template-columns: 86px minmax(0, 1fr);
-}
-
-html[data-sidebar-state="collapsed"] .sidebar {
-  padding: 0.75rem;
-}
-
-html[data-sidebar-state="collapsed"] .sidebar-title {
-  display: none;
-}
-
-html[data-sidebar-state="collapsed"] .sidebar a {
-  min-height: 44px;
-  overflow: hidden;
-  font-size: 0;
-  text-align: center;
-}
-
-html[data-sidebar-state="collapsed"] .sidebar a::first-letter {
-  font-size: 1rem;
-}
-
 html[data-card-style="minimal"] .panel,
 html[data-card-style="minimal"] .stat-card,
 html[data-card-style="minimal"] .course-card,
@@ -1192,20 +1154,12 @@ html[data-theme-mode="dark"] .connection-banner.offline {
     grid-template-columns: 1fr;
   }
 
-  html[data-sidebar-state="hidden"] .app-shell {
-    grid-template-columns: 1fr;
-  }
-
   .sidebar {
     position: static;
     display: flex;
     height: auto;
     gap: 0.5rem;
     overflow-x: auto;
-  }
-
-  html[data-sidebar-state="hidden"] .sidebar {
-    display: none;
   }
 
   .sidebar a {

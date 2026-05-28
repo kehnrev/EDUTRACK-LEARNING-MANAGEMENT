@@ -145,8 +145,3 @@ public class QuickThemeViewModel
 {
     public string ThemeMode { get; set; } = "Light";
 }
-
-public class QuickSidebarViewModel
-{
-    public string SidebarState { get; set; } = "Expanded";
-}

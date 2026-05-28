@@ -79,18 +79,6 @@
         <span asp-validation-for="LayoutStyle" class="text-danger"></span>
 
         <div class="option-grid two">
-            @foreach (var item in UserSettings.SidebarStates)
-            {
-                <label class="option-card">
-                    <input asp-for="SidebarState" type="radio" value="@item" />
-                    <strong>@item Sidebar</strong>
-                    <span>@(item == "Hidden" ? "Hide the dashboard menu until you open it again." : item == "Collapsed" ? "Keep navigation narrow while working." : "Show the full sidebar navigation labels.")</span>
-                </label>
-            }
-        </div>
-        <span asp-validation-for="SidebarState" class="text-danger"></span>
-
-        <div class="option-grid two">
             @foreach (var item in UserSettings.CardStyles)
             {
                 <label class="option-card">

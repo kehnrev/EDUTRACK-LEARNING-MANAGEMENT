@@ -18,7 +18,7 @@ public class UserSettings
 
     public static readonly string[] ThemeModes = ["Light", "Dark", "System"];
     public static readonly string[] LayoutStyles = ["Comfortable", "Compact"];
-    public static readonly string[] SidebarStates = ["Expanded", "Collapsed", "Hidden"];
+    public static readonly string[] SidebarStates = ["Expanded"];
     public static readonly string[] FontSizes = ["Small", "Medium", "Large"];
     public static readonly string[] CardStyles = ["Default", "Minimal"];
     public static readonly string[] ReminderTimings = ["Same day", "1 day before", "2 days before", "1 week before"];

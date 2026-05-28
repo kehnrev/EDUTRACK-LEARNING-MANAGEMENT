@@ -55,7 +55,7 @@ public class SettingsController : Controller
         user.FullName = model.FullName.Trim();
         settings.ThemeMode = model.ThemeMode;
         settings.LayoutStyle = model.LayoutStyle;
-        settings.SidebarState = model.SidebarState;
+        settings.SidebarState = UserSettings.DefaultSidebarState;
         settings.FontSize = model.FontSize;
         settings.CardStyle = model.CardStyle;
         settings.HighContrastMode = model.HighContrastMode;
@@ -119,24 +119,6 @@ public class SettingsController : Controller
         return Json(new { success = true, message = "Settings saved successfully." });
     }
 
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> QuickSidebar([FromBody] QuickSidebarViewModel model)
-    {
-        if (!UserSettings.IsValidSidebarState(model.SidebarState))
-        {
-            return BadRequest(new { success = false, message = "Choose Expanded Sidebar, Collapsed Sidebar, or Hidden Sidebar." });
-        }
-
-        var settings = await GetOrCreateSettingsAsync(User.GetUserId());
-        settings.SidebarState = model.SidebarState;
-        settings.UpdatedAt = DateTime.UtcNow;
-        await _context.SaveChangesAsync();
-
-        return Json(new { success = true, message = "Settings saved successfully." });
-    }
-
-
     private async Task<UserSettings> GetOrCreateSettingsAsync(int userId)
     {
         var settings = await _context.UserSettings.FirstOrDefaultAsync(s => s.UserId == userId);
@@ -166,7 +148,7 @@ public class SettingsController : Controller
             Role = user.Role.ToString(),
             ThemeMode = settings.ThemeMode,
             LayoutStyle = settings.LayoutStyle,
-            SidebarState = settings.SidebarState,
+            SidebarState = UserSettings.DefaultSidebarState,
             FontSize = settings.FontSize,
             CardStyle = settings.CardStyle,
             HighContrastMode = settings.HighContrastMode,
@@ -215,11 +197,6 @@ public class SettingsController : Controller
         if (!UserSettings.IsValidLayoutStyle(model.LayoutStyle))
         {
             ModelState.AddModelError(nameof(model.LayoutStyle), "Choose Comfortable Layout or Compact Layout.");
-        }
-
-        if (!UserSettings.IsValidSidebarState(model.SidebarState))
-        {
-            ModelState.AddModelError(nameof(model.SidebarState), "Choose Expanded Sidebar, Collapsed Sidebar, or Hidden Sidebar.");
         }
 
         if (!UserSettings.IsValidFontSize(model.FontSize))

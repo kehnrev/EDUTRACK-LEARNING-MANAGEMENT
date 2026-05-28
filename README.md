@@ -93,13 +93,10 @@ Available options:
 
 - Theme Mode: Light Mode, Dark Mode, System Default
 - Layout Style: Comfortable Layout, Compact Layout
-- Sidebar Preference: Expanded Sidebar, Collapsed Sidebar
 - Font Size: Small, Medium, Large
 - Dashboard Card Style: Default cards, Minimal cards
 
 Settings are saved per user in the database and also stored in localStorage so the selected appearance loads quickly and still works while offline.
-
-The dashboard menu can also be hidden or shown from any authenticated page. The sidebar state is saved in localStorage and synced to `UserSettings.SidebarState` when possible.
 
 ## Learning Material Uploads
 
@@ -195,7 +192,7 @@ http://localhost:5107
 6. Open Assessments and verify upcoming and completed assessments appear.
 7. Open Scores and verify course name, assessment title, score, total points, percentage, performance label, status, and submitted date.
 8. Open Reports and use the Print button.
-9. Open Settings, test Light Mode, Dark Mode, System Default, compact layout, sidebar state, font sizes, and card style.
+9. Open Settings, test Light Mode, Dark Mode, System Default, compact layout, font sizes, and card style.
 10. Refresh the browser and confirm saved settings remain.
 11. Disconnect internet or use browser offline mode to check the offline banner and cached pages.
 
