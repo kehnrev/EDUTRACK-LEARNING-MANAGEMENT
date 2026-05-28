@@ -645,6 +645,31 @@ html[data-low-data-mode="true"] .app-shell {
   color: var(--muted);
 }
 
+.offline-check-panel {
+  width: 100%;
+  padding: 0.85rem;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.offline-check-panel .form-check-input:checked {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.offline-feedback {
+  margin-top: 0.45rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.offline-feedback.selected {
+  color: var(--primary);
+  font-weight: 800;
+}
+
 .question-block {
   padding: 1rem 0;
   border-bottom: 1px solid var(--line);

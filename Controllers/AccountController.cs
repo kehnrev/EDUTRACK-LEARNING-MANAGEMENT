@@ -160,7 +160,8 @@ public class AccountController : Controller
         {
             UserRole.Admin => RedirectToAction("Index", "Admin"),
             UserRole.Teacher => RedirectToAction("Index", "Teacher"),
-            _ => RedirectToAction("Index", "Student")
+            UserRole.Student => RedirectToAction("Index", "Student"),
+            _ => RedirectToAction(nameof(AccessDenied))
         };
     }
 

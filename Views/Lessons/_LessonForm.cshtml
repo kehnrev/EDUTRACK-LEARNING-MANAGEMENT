@@ -21,7 +21,7 @@
     <div class="col-md-8">
         <label class="form-label" for="materialFile">Upload Learning Material</label>
         <input class="form-control" id="materialFile" name="materialFile" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt" />
-        <span class="text-danger" data-valmsg-for="materialFile"></span>
+        <span class="text-danger">@Html.ValidationMessage("materialFile")</span>
         <div class="form-text">Optional. PDF, Word, PowerPoint, and text files only. Maximum size: 10 MB.</div>
         @if (!string.IsNullOrWhiteSpace(Model.OriginalFileName) && !string.IsNullOrWhiteSpace(Model.FilePath))
         {
@@ -41,9 +41,17 @@
         <span asp-validation-for="FilePath" class="text-danger"></span>
     </div>
     <div class="col-md-4 d-flex align-items-end">
-        <div class="form-check">
+        <div class="form-check offline-check-panel">
             <input asp-for="IsAvailableOffline" class="form-check-input" />
             <label asp-for="IsAvailableOffline" class="form-check-label">Available Offline</label>
+            <div class="offline-feedback"
+                 data-offline-feedback
+                 data-checked-message="This lesson will be marked as available offline."
+                 data-unchecked-message="This lesson will require internet access unless downloaded separately.">
+                @(Model.IsAvailableOffline
+                    ? "This lesson will be marked as available offline."
+                    : "This lesson will require internet access unless downloaded separately.")
+            </div>
         </div>
     </div>
 </div>

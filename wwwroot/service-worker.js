@@ -1,5 +1,5 @@
-const STATIC_CACHE = "edutrack-static-v1";
-const DYNAMIC_CACHE = "edutrack-dynamic-v1";
+const STATIC_CACHE = "edutrack-static-v3";
+const DYNAMIC_CACHE = "edutrack-dynamic-v3";
 const OFFLINE_URL = "/Home/Offline";
 
 const STATIC_ASSETS = [

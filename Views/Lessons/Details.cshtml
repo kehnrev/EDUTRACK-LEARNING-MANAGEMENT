@@ -19,7 +19,7 @@
 
 <section class="panel lesson-reader" data-lesson-id="@Model.LessonId" data-lesson-title="@Model.Title" data-course-title="@Model.Course?.Title">
     <div class="lesson-meta">
-        <span class="badge @(Model.IsAvailableOffline ? "text-bg-success" : "text-bg-secondary")">@(Model.IsAvailableOffline ? "Available offline" : "Online only")</span>
+        <span class="badge @(Model.IsAvailableOffline ? "text-bg-success" : "text-bg-secondary")">@(Model.IsAvailableOffline ? "Available Offline" : "Needs Internet")</span>
         <span>@Model.DateCreated.ToLocalTime().ToString("MMM dd, yyyy")</span>
     </div>
     <p class="lesson-content" id="lessonContent">@Model.Content</p>

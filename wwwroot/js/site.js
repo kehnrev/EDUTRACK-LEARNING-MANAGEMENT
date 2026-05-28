@@ -269,6 +269,25 @@
     });
   }
 
+  function setupOfflineCheckboxFeedback() {
+    document.querySelectorAll('input[name="IsAvailableOffline"]').forEach((checkbox) => {
+      const feedback = checkbox.closest(".offline-check-panel")?.querySelector("[data-offline-feedback]");
+      if (!feedback) return;
+
+      const update = () => {
+        const checkedMessage = feedback.dataset.checkedMessage || "This lesson will be marked as available offline.";
+        const uncheckedMessage = feedback.dataset.uncheckedMessage || "This lesson will require internet access unless downloaded separately.";
+        feedback.textContent = checkbox.checked
+          ? checkedMessage
+          : uncheckedMessage;
+        feedback.classList.toggle("selected", checkbox.checked);
+      };
+
+      checkbox.addEventListener("change", update);
+      update();
+    });
+  }
+
   function updateConnectionBanner() {
     const banner = document.getElementById("connectionBanner");
     if (!banner) return;
@@ -835,6 +854,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     setupAppearanceSettings();
     setupSidebarToggle();
+    setupOfflineCheckboxFeedback();
     updateConnectionBanner();
     registerServiceWorker();
     setupOfflineLessonSave();

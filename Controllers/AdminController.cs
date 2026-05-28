@@ -15,54 +15,94 @@ public class AdminController : Controller
     private readonly ApplicationDbContext _context;
     private readonly IPasswordHasher<ApplicationUser> _passwordHasher;
     private readonly PerformanceAnalyticsService _analytics;
+    private readonly ILogger<AdminController> _logger;
 
     public AdminController(
         ApplicationDbContext context,
         IPasswordHasher<ApplicationUser> passwordHasher,
-        PerformanceAnalyticsService analytics)
+        PerformanceAnalyticsService analytics,
+        ILogger<AdminController> logger)
     {
         _context = context;
         _passwordHasher = passwordHasher;
         _analytics = analytics;
+        _logger = logger;
     }
 
     public async Task<IActionResult> Index()
     {
-        var settings = await _context.UserSettings
-            .AsNoTracking()
-            .FirstOrDefaultAsync(s => s.UserId == User.GetUserId()) ?? UserSettings.CreateDefault(User.GetUserId());
-
-        var enrollmentSummary = await _context.Courses
-            .Include(c => c.Enrollments)
-            .OrderBy(c => c.Title)
-            .ToDictionaryAsync(c => c.Title, c => c.Enrollments.Count);
-
-        var passed = await _context.Submissions.CountAsync(s => s.Score >= settings.DefaultPassingScore);
-        var needsSupport = await _context.Submissions.CountAsync(s => s.Score < settings.DefaultPassingScore);
-
-        var model = new AdminDashboardViewModel
+        try
         {
-            TotalStudents = await _context.Users.CountAsync(u => u.Role == UserRole.Student),
-            TotalTeachers = await _context.Users.CountAsync(u => u.Role == UserRole.Teacher),
-            TotalCourses = await _context.Courses.CountAsync(),
-            TotalAssessments = await _context.Assessments.CountAsync(),
-            OverallAveragePerformance = await _analytics.GetOverallAverageAsync(),
-            PendingSyncSubmissions = await _context.Submissions.CountAsync(s => s.Status == SubmissionStatus.PendingSync),
-            RecentAnnouncements = await _context.Announcements
-                .Include(a => a.CreatedBy)
-                .OrderByDescending(a => a.CreatedAt)
-                .Take(5)
-                .ToListAsync(),
-            CourseEnrollmentSummary = enrollmentSummary,
+            var settings = await _context.UserSettings
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.UserId == User.GetUserId()) ?? UserSettings.CreateDefault(User.GetUserId());
+
+            var enrollmentRows = await _context.Courses
+                .AsNoTracking()
+                .Include(c => c.Enrollments)
+                .OrderBy(c => c.Title)
+                .Select(c => new
+                {
+                    c.Title,
+                    EnrollmentCount = c.Enrollments.Count
+                })
+                .ToListAsync();
+
+            var enrollmentSummary = enrollmentRows
+                .GroupBy(c => c.Title)
+                .ToDictionary(g => g.Key, g => g.Sum(c => c.EnrollmentCount));
+
+            var passed = await _context.Submissions.CountAsync(s => s.Score >= settings.DefaultPassingScore);
+            var needsSupport = await _context.Submissions.CountAsync(s => s.Score < settings.DefaultPassingScore);
+
+            var model = new AdminDashboardViewModel
+            {
+                TotalStudents = await _context.Users.CountAsync(u => u.Role == UserRole.Student),
+                TotalTeachers = await _context.Users.CountAsync(u => u.Role == UserRole.Teacher),
+                TotalCourses = await _context.Courses.CountAsync(),
+                TotalAssessments = await _context.Assessments.CountAsync(),
+                OverallAveragePerformance = await _analytics.GetOverallAverageAsync(),
+                PendingSyncSubmissions = await _context.Submissions.CountAsync(s => s.Status == SubmissionStatus.PendingSync),
+                RecentAnnouncements = await _context.Announcements
+                    .AsNoTracking()
+                    .Include(a => a.CreatedBy)
+                    .OrderByDescending(a => a.CreatedAt)
+                    .Take(5)
+                    .ToListAsync(),
+                CourseEnrollmentSummary = enrollmentSummary,
+                PassFailDistribution = new Dictionary<string, int>
+                {
+                    ["Passed"] = passed,
+                    ["Needs Support"] = needsSupport
+                }
+            };
+
+            ViewBag.ShowDemoDataNotice = settings.EnableDemoDataNotice;
+            return View(model);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Admin dashboard data could not be loaded.");
+            Console.Error.WriteLine($"Admin dashboard data could not be loaded. Details: {ex.Message}");
+            TempData["Error"] = "Admin dashboard data could not be loaded. Please try again.";
+            ViewBag.ShowDemoDataNotice = false;
+
+            return View(CreateEmptyDashboardModel());
+        }
+    }
+
+    private static AdminDashboardViewModel CreateEmptyDashboardModel()
+    {
+        return new AdminDashboardViewModel
+        {
+            RecentAnnouncements = new List<Announcement>(),
+            CourseEnrollmentSummary = new Dictionary<string, int>(),
             PassFailDistribution = new Dictionary<string, int>
             {
-                ["Passed"] = passed,
-                ["Needs Support"] = needsSupport
+                ["Passed"] = 0,
+                ["Needs Support"] = 0
             }
         };
-
-        ViewBag.ShowDemoDataNotice = settings.EnableDemoDataNotice;
-        return View(model);
     }
 
     public async Task<IActionResult> Users(string? search, UserRole? role)

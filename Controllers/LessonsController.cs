@@ -13,13 +13,18 @@ public class LessonsController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly IWebHostEnvironment _environment;
+    private readonly ILogger<LessonsController> _logger;
     private static readonly string[] AllowedMaterialExtensions = [".pdf", ".doc", ".docx", ".ppt", ".pptx", ".txt"];
     private const long MaxMaterialFileSize = 10 * 1024 * 1024;
 
-    public LessonsController(ApplicationDbContext context, IWebHostEnvironment environment)
+    public LessonsController(
+        ApplicationDbContext context,
+        IWebHostEnvironment environment,
+        ILogger<LessonsController> logger)
     {
         _context = context;
         _environment = environment;
+        _logger = logger;
     }
 
     public async Task<IActionResult> Index(int? courseId, string? search)
@@ -98,7 +103,8 @@ public class LessonsController : Controller
 
         if (!System.IO.File.Exists(physicalPath))
         {
-            return NotFound();
+            TempData["Error"] = "Learning material file is currently unavailable.";
+            return RedirectToAction(nameof(Details), new { id });
         }
 
         return PhysicalFile(
@@ -139,17 +145,38 @@ public class LessonsController : Controller
         }
 
         lesson.DateCreated = DateTime.UtcNow;
+        string? savedFilePath = null;
 
         try
         {
-            await SaveMaterialFileAsync(lesson, materialFile);
+            savedFilePath = await SaveMaterialFileAsync(lesson, materialFile);
             _context.Lessons.Add(lesson);
             await _context.SaveChangesAsync();
-            TempData["Success"] = "Lecture / Lesson added successfully.";
+            TempData["Success"] = lesson.IsAvailableOffline
+                ? "Lecture / Lesson saved and marked as Available Offline."
+                : "Lecture / Lesson saved successfully.";
             return RedirectToAction(nameof(Index), new { lesson.CourseId });
         }
-        catch (Exception)
+        catch (IOException ex)
         {
+            _logger.LogError(ex, "Learning material upload failed for course {CourseId}.", lesson.CourseId);
+            DeleteUploadedFile(savedFilePath, null);
+            ModelState.AddModelError(string.Empty, "The learning material could not be saved. Please check the file and try again.");
+            await LoadCoursesAsync(lesson.CourseId);
+            return View(lesson);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogError(ex, "Learning material upload path is not writable for course {CourseId}.", lesson.CourseId);
+            DeleteUploadedFile(savedFilePath, null);
+            ModelState.AddModelError(string.Empty, "The learning material could not be saved. Please check the file and try again.");
+            await LoadCoursesAsync(lesson.CourseId);
+            return View(lesson);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Lesson save failed for course {CourseId}.", lesson.CourseId);
+            DeleteUploadedFile(savedFilePath, null);
             ModelState.AddModelError(string.Empty, "The lesson could not be saved. Please try again.");
             await LoadCoursesAsync(lesson.CourseId);
             return View(lesson);
@@ -221,23 +248,57 @@ public class LessonsController : Controller
         lesson.ContentType = postedFilePath == existing.FilePath ? existing.ContentType : null;
         lesson.FileSize = postedFilePath == existing.FilePath ? existing.FileSize : null;
 
+        string? savedReplacementPath = null;
+
         try
         {
             var previousFilePath = existing.FilePath;
-            await SaveMaterialFileAsync(lesson, materialFile);
+            savedReplacementPath = await SaveMaterialFileAsync(lesson, materialFile);
             _context.Update(lesson);
             await _context.SaveChangesAsync();
-            if (materialFile != null || postedFilePath != existing.FilePath)
+            if (savedReplacementPath != null || postedFilePath != existing.FilePath)
             {
                 DeleteUploadedFile(previousFilePath, lesson.FilePath);
             }
-            TempData["Success"] = "Lecture / Lesson updated.";
+            TempData["Success"] = lesson.IsAvailableOffline
+                ? "Lecture / Lesson saved and marked as Available Offline."
+                : "Lecture / Lesson saved successfully.";
             return RedirectToAction(nameof(Index), new { lesson.CourseId });
         }
-        catch (Exception)
+        catch (IOException ex)
         {
+            _logger.LogError(ex, "Learning material replacement failed for lesson {LessonId}.", id);
+            DeleteUploadedFile(savedReplacementPath, null);
+            ModelState.AddModelError(string.Empty, "The learning material could not be saved. Please check the file and try again.");
+            await LoadCoursesAsync(lesson.CourseId);
+            lesson.FilePath = existing.FilePath;
+            lesson.OriginalFileName = existing.OriginalFileName;
+            lesson.ContentType = existing.ContentType;
+            lesson.FileSize = existing.FileSize;
+            return View(lesson);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogError(ex, "Learning material replacement path is not writable for lesson {LessonId}.", id);
+            DeleteUploadedFile(savedReplacementPath, null);
+            ModelState.AddModelError(string.Empty, "The learning material could not be saved. Please check the file and try again.");
+            await LoadCoursesAsync(lesson.CourseId);
+            lesson.FilePath = existing.FilePath;
+            lesson.OriginalFileName = existing.OriginalFileName;
+            lesson.ContentType = existing.ContentType;
+            lesson.FileSize = existing.FileSize;
+            return View(lesson);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Lesson update failed for lesson {LessonId}.", id);
+            DeleteUploadedFile(savedReplacementPath, null);
             ModelState.AddModelError(string.Empty, "The lesson could not be updated. Please try again.");
             await LoadCoursesAsync(lesson.CourseId);
+            lesson.FilePath = existing.FilePath;
+            lesson.OriginalFileName = existing.OriginalFileName;
+            lesson.ContentType = existing.ContentType;
+            lesson.FileSize = existing.FileSize;
             return View(lesson);
         }
     }
@@ -347,18 +408,18 @@ public class LessonsController : Controller
         }
     }
 
-    private async Task SaveMaterialFileAsync(Lesson lesson, IFormFile? materialFile)
+    private async Task<string?> SaveMaterialFileAsync(Lesson lesson, IFormFile? materialFile)
     {
         if (materialFile == null || materialFile.Length == 0)
         {
-            return;
+            return null;
         }
 
         var extension = Path.GetExtension(materialFile.FileName).ToLowerInvariant();
         var uploadsRoot = Path.Combine(_environment.WebRootPath, "uploads", "lessons");
         Directory.CreateDirectory(uploadsRoot);
 
-        var safeFileName = $"{Guid.NewGuid():N}{extension}";
+        var safeFileName = $"lesson_{DateTime.UtcNow:yyyyMMddHHmmss}_{Guid.NewGuid():N}{extension}";
         var physicalPath = Path.Combine(uploadsRoot, safeFileName);
 
         await using (var stream = System.IO.File.Create(physicalPath))
@@ -368,8 +429,13 @@ public class LessonsController : Controller
 
         lesson.FilePath = $"/uploads/lessons/{safeFileName}";
         lesson.OriginalFileName = Path.GetFileName(materialFile.FileName);
+        if (lesson.OriginalFileName.Length > 255)
+        {
+            lesson.OriginalFileName = lesson.OriginalFileName[..255];
+        }
         lesson.ContentType = materialFile.ContentType;
         lesson.FileSize = materialFile.Length;
+        return lesson.FilePath;
     }
 
     private void DeleteUploadedFile(string? oldFilePath, string? replacementFilePath)

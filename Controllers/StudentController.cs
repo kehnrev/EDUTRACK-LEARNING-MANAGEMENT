@@ -75,7 +75,8 @@ public class StudentController : Controller
             CourseProgress = progress,
             RecentAssessmentScores = recentScores
                 .OrderBy(s => s.SubmittedAt)
-                .ToDictionary(s => s.Assessment?.Title ?? "Assessment", s => s.Score),
+                .GroupBy(s => s.Assessment?.Title ?? $"Assessment {s.AssessmentId}")
+                .ToDictionary(g => g.Key, g => g.Last().Score),
             CompletedAssessments = completedAssessments,
             RemainingAssessments = Math.Max(0, totalAssessments - completedAssessments)
         };

@@ -49,7 +49,7 @@ else
                                 <span class="text-muted">No file</span>
                             }
                         </td>
-                        <td><span class="badge @(lesson.IsAvailableOffline ? "text-bg-success" : "text-bg-secondary")">@(lesson.IsAvailableOffline ? "Available Offline" : "Online Only")</span></td>
+                        <td><span class="badge @(lesson.IsAvailableOffline ? "text-bg-success" : "text-bg-secondary")">@(lesson.IsAvailableOffline ? "Available Offline" : "Needs Internet")</span></td>
                         <td>@lesson.DateCreated.ToLocalTime().ToString("MMM dd, yyyy")</td>
                         <td class="text-end">
                             <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@lesson.LessonId">Open</a>
