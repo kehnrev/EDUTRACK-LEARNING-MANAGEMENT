@@ -246,7 +246,7 @@ public class AdminController : Controller
         try
         {
             await _context.SaveChangesAsync();
-            TempData["Success"] = "User account updated.";
+            TempData["Success"] = "User updated successfully.";
             return RedirectToAction(nameof(Users));
         }
         catch (Exception)

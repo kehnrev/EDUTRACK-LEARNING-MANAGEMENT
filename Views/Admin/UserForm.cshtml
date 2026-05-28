@@ -34,13 +34,34 @@
             </div>
             <div class="col-md-6">
                 <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" placeholder="@(isEdit ? "Leave blank to keep current password" : "Set password")" />
+                <div class="password-field">
+                    <input asp-for="Password" class="form-control" autocomplete="new-password" placeholder="@(isEdit ? "Leave blank to keep current password" : "Set password")" />
+                    <button class="btn btn-outline-primary password-toggle" type="button" data-password-toggle aria-label="Show password">Show</button>
+                </div>
+                <div class="form-text">
+                    @if (isEdit)
+                    {
+                        <span>Leave blank if you do not want to change this user's password. For security, existing passwords cannot be viewed.</span>
+                    }
+                    else
+                    {
+                        <span>Set the first password for this user.</span>
+                    }
+                </div>
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
             <div class="col-12">
                 <div class="form-check">
                     <input asp-for="IsActive" class="form-check-input" />
                     <label asp-for="IsActive" class="form-check-label"></label>
+                    <div class="form-text"
+                         data-checkbox-feedback
+                         data-checked-message="This user can login and access the system."
+                         data-unchecked-message="This user is disabled and cannot login.">
+                        @(Model.IsActive
+                            ? "This user can login and access the system."
+                            : "This user is disabled and cannot login.")
+                    </div>
                 </div>
             </div>
         </div>

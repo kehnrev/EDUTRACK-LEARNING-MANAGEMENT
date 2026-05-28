@@ -7,7 +7,8 @@
     <div class="auth-card">
         <span class="eyebrow">Welcome back</span>
         <h1>Login to EduTrack</h1>
-        <form asp-action="Login" method="post" asp-route-returnUrl="@ViewData["ReturnUrl"]" novalidate>
+        <form asp-controller="Account" asp-action="Login" method="post" asp-route-returnUrl="@ViewData["ReturnUrl"]" novalidate>
+            @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="mb-3">
                 <label asp-for="Email" class="form-label"></label>
@@ -16,12 +17,16 @@
             </div>
             <div class="mb-3">
                 <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                <div class="password-field">
+                    <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                    <button class="btn btn-outline-primary password-toggle" type="button" data-password-toggle aria-label="Show password">Show</button>
+                </div>
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
             <div class="form-check mb-3">
                 <input asp-for="RememberMe" class="form-check-input" />
                 <label asp-for="RememberMe" class="form-check-label"></label>
+                <div class="form-text">Keep me signed in on this device.</div>
             </div>
             <button class="btn btn-primary w-100" type="submit">Login</button>
         </form>

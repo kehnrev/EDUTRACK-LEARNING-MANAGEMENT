@@ -240,6 +240,49 @@
     });
   }
 
+  function setupCheckboxFeedback() {
+    document.querySelectorAll(".form-check-input[type='checkbox']").forEach((checkbox) => {
+      const formCheck = checkbox.closest(".form-check");
+      const update = () => {
+        formCheck?.classList.toggle("is-checked", checkbox.checked);
+
+        const feedback = formCheck?.querySelector("[data-checkbox-feedback]");
+        if (!feedback) return;
+
+        const checkedMessage = feedback.dataset.checkedMessage || "Selected.";
+        const uncheckedMessage = feedback.dataset.uncheckedMessage || "Not selected.";
+        feedback.textContent = checkbox.checked ? checkedMessage : uncheckedMessage;
+        feedback.classList.toggle("selected", checkbox.checked);
+      };
+
+      checkbox.addEventListener("change", update);
+      update();
+    });
+  }
+
+  function setupPasswordToggles() {
+    document.querySelectorAll("[data-password-toggle]").forEach((button) => {
+      const wrapper = button.closest(".password-field");
+      const input = wrapper?.querySelector("input");
+      if (!input) return;
+
+      const update = () => {
+        const isVisible = input.type === "text";
+        button.textContent = isVisible ? "Hide" : "Show";
+        button.setAttribute("aria-label", isVisible ? "Hide password" : "Show password");
+        button.setAttribute("aria-pressed", isVisible ? "true" : "false");
+      };
+
+      button.addEventListener("click", () => {
+        input.type = input.type === "password" ? "text" : "password";
+        input.focus();
+        update();
+      });
+
+      update();
+    });
+  }
+
   let connectionBannerTimer;
 
   function pendingSubmissionCount() {
@@ -862,6 +905,8 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     setupAppearanceSettings();
+    setupCheckboxFeedback();
+    setupPasswordToggles();
     setupOfflineCheckboxFeedback();
     updateConnectionBannerOnLoad();
     registerServiceWorker();
